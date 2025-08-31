@@ -1,0 +1,649 @@
+openapi: 3.0.3
+info:
+  title: DSocal start 10/2023
+  description: |-
+    ## This is server api of Socal created by Tran Thu Dat
+  contact:
+    email: trandat.dev12@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+servers:
+  - url: http://localhost:1236
+    description: 'API dev'
+  - url: https://petstore3.swagger.io/api/v3
+    description: 'API production'
+tags:
+  - name: Users
+    description: Everything about your Users
+  - name: Followers
+    description: handle Follower
+  - name: Tweets
+    description: ref to Tweets
+  - name: Hashtags
+    description: ref to Hashtags
+  - name: Bookmarks
+    description: ref to bookmarks
+  - name: Media
+    description: Handle media uploads (images and videos)
+
+paths:
+  /users/login:
+    post:
+      tags:
+        - Users
+      summary: Đăng nhập
+      description: Đăng nhập vào hệ thống
+      operationId: login
+      requestBody:
+        description: Thông tin đăng nhập
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginBody'
+        required: true
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+        '422':
+          description: Invalid input
+
+  /users/get-me:
+    get:
+      tags:
+        - Users
+      summary: Thông tin tài khoản đăng nhập
+      description: Thông tin tài khoản đăng nhập
+      operationId: get me
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Get me thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+
+  /users/register:
+    post:
+      tags:
+        - Users
+      summary: Đăng ký
+      description: Đăng ký vào hệ thống
+      operationId: register
+      requestBody:
+        description: Thông tin đăng nhập
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUser'
+        required: true
+      responses:
+        '200':
+          description: Đăng ký thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+
+  /users/verify-email:
+    post:
+      tags:
+        - Users
+      summary: Xác thực email
+      description: Xác thực email khi mới đăng ký
+      operationId: verify-email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_verify_token:
+                  type: string
+                  example: 'your_verification_token_here'
+      responses:
+        '200':
+          description: Verify email thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyEmail'
+
+  /users/logout:
+    post:
+      tags:
+        - Users
+      summary: Đăng xuất
+      description: Đăng xuất khỏi hệ thông
+      operationId: logout
+      requestBody:
+        description: Thông tin đăng xuất
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjUzN2Y4OTQ2YmU4ZDJlODM0NjU5MjJiIiwidG9rZW5fdHlwZSI6MCwidmVyaWZ5IjoxLCJpYXQiOjE3MTkxNDA5NDEsImV4cCI6MTcxOTE0MTg0MX0.KbW2bHQfsisq1bTzEpzcyAC_BKko0PvkaF1j6YNr6WY
+        required: true
+      responses:
+        '200':
+          description: Đăng xuất thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+
+      security:
+        - BearerAuth: []
+
+  /tweets:
+    post:
+      tags:
+        - Tweets
+      security:
+        - BearerAuth: []
+      summary: Tạo tweet
+      description: Tạo tweet
+      operationId: create tweets
+      requestBody:
+        description: Tạo tweet
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTweetsBody'
+        required: true
+      responses:
+        '200':
+          description: Tạo tweet thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+        '422':
+          description: Invalid input
+
+  /bookmarks:
+    post:
+      tags:
+        - Bookmarks
+      security:
+        - BearerAuth: []
+      summary: Tạo bookmark
+      operationId: create bookmark
+      requestBody:
+        description: Tạo bookmark
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookmarkBody'
+        required: true
+      responses:
+        '200':
+          description: Tạo bookmark thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bookmark'
+        '422':
+          description: Invalid input
+    delete:
+      tags:
+        - Bookmarks
+      security:
+        - BearerAuth: []
+      summary: Huỷ bookmark
+      operationId: delete bookmark
+      requestBody:
+        description: Huỷ bookmark
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  example: '66adeb3e856daea6adb98bdc'
+        required: true
+      responses:
+        '200':
+          description: Tạo bookmark thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bookmark'
+        '422':
+          description: Invalid input
+
+  /likes:
+    post:
+      tags:
+        - Likes
+      security:
+        - BearerAuth: []
+      summary: Tạo likes
+      operationId: create likes
+      requestBody:
+        description: Tạo likes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLikeBody'
+        required: true
+      responses:
+        '200':
+          description: Tạo like thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Like'
+        '422':
+          description: Invalid input
+    delete:
+      tags:
+        - Likes
+      security:
+        - BearerAuth: []
+      summary: Bỏ likes
+      operationId: delete likes
+      requestBody:
+        description: Bỏ likes
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  example: '66adeb3e856daea6adb98bdc'
+        required: true
+      responses:
+        '200':
+          description: Bỏ like thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Like'
+        '422':
+          description: Invalid input
+
+  /hash-tags:
+    post:
+      tags:
+        - Hashtags
+      security:
+        - BearerAuth: []
+      summary: Tạo hashtags
+      description: Tạo hashtags
+      operationId: create hashtags
+      requestBody:
+        description: Tạo hashtags
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: '18+ ne'
+        required: true
+      responses:
+        '200':
+          description: Tạo hashtags thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+        '422':
+          description: Invalid input
+
+  /medias/upload-image:
+    post:
+      tags:
+        - Media
+      security:
+        - BearerAuth: []
+      summary: Tải lên hình ảnh
+      description: Tải lên hình ảnh với định dạng JPG, JPEG, PNG
+      operationId: upload-image
+      requestBody:
+        description: Tải lên hình ảnh
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File hình ảnh cần upload (JPG, JPEG, PNG)
+        required: true
+      responses:
+        '200':
+          description: Tải lên hình ảnh thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaUploadResponse'
+        '400':
+          description: Lỗi định dạng file hoặc kích thước
+        '422':
+          description: Invalid input
+
+  /medias/upload-video:
+    post:
+      tags:
+        - Media
+      security:
+        - BearerAuth: []
+      summary: Tải lên video
+      description: Tải lên video với định dạng MP4, AVI, MOV
+      operationId: upload-video
+      requestBody:
+        description: Tải lên video
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video:
+                  type: string
+                  format: binary
+                  description: File video cần upload (MP4, AVI, MOV)
+        required: true
+      responses:
+        '200':
+          description: Tải lên video thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaUploadResponse'
+        '400':
+          description: Lỗi định dạng file hoặc kích thước
+        '422':
+          description: Invalid input
+
+  /statics/image/{name}:
+    get:
+      tags:
+        - Media
+      summary: Lấy hình ảnh đã upload
+      description: Lấy hình ảnh bằng tên file
+      operationId: serve-image
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Tên file hình ảnh (bao gồm extension)
+          schema:
+            type: string
+            example: 'abc123.jpg'
+      responses:
+        '200':
+          description: Trả về hình ảnh
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Không tìm thấy hình ảnh
+
+  /statics/video-stream/{name}:
+    get:
+      tags:
+        - Media
+      summary: Stream video đã upload
+      description: Stream video với hỗ trợ range request
+      operationId: serve-video-stream
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Tên file video (bao gồm extension)
+          schema:
+            type: string
+            example: 'video123.mp4'
+        - name: Range
+          in: header
+          required: false
+          description: Range header để stream video
+          schema:
+            type: string
+            example: 'bytes=0-1024'
+      responses:
+        '206':
+          description: Partial content - streaming video
+          headers:
+            Content-Range:
+              description: Range của content được trả về
+              schema:
+                type: string
+                example: 'bytes 0-1024/2048000'
+            Accept-Ranges:
+              description: Server hỗ trợ range requests
+              schema:
+                type: string
+                example: 'bytes'
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+            video/avi:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Missing Range header
+        '404':
+          description: Không tìm thấy video
+
+components:
+  schemas:
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          example: trandat1@gmail.com
+        password:
+          type: string
+          example: Sgod123@
+      required:
+        - email
+        - password
+    SuccessAuthentication:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login Success
+        token:
+          type: array
+          example: ['accessToken', 'refreshToken']
+    UserVerifyStatus:
+      type: number
+      enum:
+        - Unverified
+        - Verified
+        - Banned
+      example: 1
+    Me:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: '666d623b10aeff617a6e0f94'
+        name:
+          type: string
+          example: 'Tran Thu Dat'
+        email:
+          type: string
+          example: 'thudatdl123@gmail.com'
+        date_of_birth:
+          type: string
+          format: date-time
+          example: '2001-03-12T00:00:00.000Z'
+        created_at:
+          type: string
+          format: date-time
+          example: '2024-06-15T09:43:23.462Z'
+        updated_at:
+          type: string
+          format: date-time
+          example: '2024-06-15T09:43:23.462Z'
+        verify:
+          $ref: '#/components/schemas/UserVerifyStatus'
+        bio:
+          type: string
+          example: ''
+        location:
+          type: string
+          example: ''
+        website:
+          type: string
+          example: ''
+        username:
+          type: string
+          example: ''
+        avatar:
+          type: string
+          example: ''
+        cover_photo:
+          type: string
+          example: ''
+    RegisterUser:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'John Doe'
+        email:
+          type: string
+          example: 'johndoe@example.com'
+        password:
+          type: string
+          example: '!Thudat123'
+        confirm_password:
+          type: string
+          example: '!Thudat123'
+      required:
+        - name
+        - email
+        - password
+        - confirm_password
+    VerifyEmail:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            access_token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjY3MzBiYWIxM2U2ZWIyZWI4MTY1NTg3IiwidG9rZW5fdHlwZSI6MCwidmVyaWZ5IjowLCJpYXQiOjE3MTg4ODk1NjksImV4cCI6MTcxODg5MDQ2OX0.uFxB9T7oR9RCNtK2zbDqlW2IH-4dshzltistTNHgkE8
+            refresh_token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjY3MzBiYWIxM2U2ZWIyZWI4MTY1NTg3IiwidG9rZW5fdHlwZSI6MSwidmVyaWZ5IjowLCJpYXQiOjE3MTg4ODk1NjksImV4cCI6MTcyNzUyOTU2OX0.RZmrp2moQBb9UX6t8BasSABVz2R3j8Lt64nbN4N27EY
+        message:
+          type: string
+          example: Verify account success
+
+    CreateTweetsBody:
+      type: object
+      properties:
+        type:
+          type: number
+          example: 0
+        audience:
+          type: number
+          example: 0
+        content:
+          type: string
+          example: Thu Dat van vo song toan
+        parent_id:
+          type: string
+          example: ''
+        hashTags:
+          type: array
+          example: ['dat', 'thu', 'tran']
+        mentions:
+          type: array
+          example: []
+    Bookmark:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: '66aa638fcdb3c8cac017dc56'
+        user_id:
+          type: string
+          example: '66890be2605b09784de46ed1'
+        tweet_id:
+          type: string
+          example: '66890be2605b09784de46ed1'
+        created_at:
+          type: string
+          example: '2024-07-31T16:17:19.694+00:00'
+    Like:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: '66aa638fcdb3c8cac017dc56'
+        user_id:
+          type: string
+          example: '66890be2605b09784de46ed1'
+        tweet_id:
+          type: string
+          example: '66890be2605b09784de46ed1'
+        created_at:
+          type: string
+          example: '2024-07-31T16:17:19.694+00:00'
+    CreateBookmarkBody:
+      type: object
+      properties:
+        tweet_id:
+          type: string
+          example: '66890be2605b09784de46ed1'
+    CreateLikeBody:
+      type: object
+      properties:
+        tweet_id:
+          type: string
+          example: '66890be2605b09784de46ed1'
+    MediaUploadResponse:
+      type: object
+      properties:
+        url:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                example: 'http://localhost:1236/statics/image/abc123.jpg'
+              type:
+                type: number
+                example: 0
+                description: '0 for Image, 1 for Video'
+        message:
+          type: string
+          example: 'Upload image successfully'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
