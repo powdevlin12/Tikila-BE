@@ -27,6 +27,8 @@ tags:
     description: ref to bookmarks
   - name: Media
     description: Handle media uploads (images and videos)
+  - name: Company
+    description: Company information management
 
 paths:
   /users/login:
@@ -451,6 +453,206 @@ paths:
         '404':
           description: Không tìm thấy video
 
+  /company/info:
+    get:
+      tags:
+        - Company
+      summary: Lấy thông tin công ty
+      description: Lấy thông tin chi tiết của công ty
+      operationId: getCompanyInfo
+      responses:
+        '200':
+          description: Lấy thông tin công ty thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyInfoResponse'
+        '404':
+          description: Không tìm thấy thông tin công ty
+        '500':
+          description: Lỗi server
+
+    put:
+      tags:
+        - Company
+      summary: Cập nhật thông tin công ty
+      description: Cập nhật thông tin chi tiết của công ty
+      operationId: updateCompanyInfo
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: Thông tin công ty cần cập nhật
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyInfoBody'
+        required: true
+      responses:
+        '200':
+          description: Cập nhật thông tin công ty thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Lỗi server
+
+  /company/info/logo:
+    put:
+      tags:
+        - Company
+      summary: Cập nhật logo công ty
+      description: Cập nhật logo của công ty
+      operationId: updateCompanyLogo
+      requestBody:
+        description: File logo mới
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File logo (JPG, JPEG, PNG)
+        required: true
+      responses:
+        '200':
+          description: Cập nhật logo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Lỗi server
+
+  /company/info/img-intro:
+    put:
+      tags:
+        - Company
+      summary: Cập nhật ảnh giới thiệu
+      description: Cập nhật ảnh giới thiệu của công ty
+      operationId: updateCompanyImgIntro
+      requestBody:
+        description: File ảnh giới thiệu mới
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File ảnh giới thiệu (JPG, JPEG, PNG)
+        required: true
+      responses:
+        '200':
+          description: Cập nhật ảnh giới thiệu thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Lỗi server
+
+  /company/contact:
+    get:
+      tags:
+        - Company
+      summary: Lấy thông tin liên hệ
+      description: Lấy thông tin liên hệ của công ty
+      operationId: getContactInfo
+      responses:
+        '200':
+          description: Lấy thông tin liên hệ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactInfoResponse'
+        '500':
+          description: Lỗi server
+
+  /company/services:
+    get:
+      tags:
+        - Company
+      summary: Lấy danh sách dịch vụ
+      description: Lấy danh sách tất cả dịch vụ của công ty
+      operationId: getServices
+      responses:
+        '200':
+          description: Lấy danh sách dịch vụ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicesResponse'
+        '500':
+          description: Lỗi server
+
+    post:
+      tags:
+        - Company
+      summary: Thêm dịch vụ mới
+      description: Tạo một dịch vụ mới cho công ty
+      operationId: createService
+      requestBody:
+        description: Thông tin dịch vụ mới
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServiceBody'
+        required: true
+      responses:
+        '201':
+          description: Tạo dịch vụ mới thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateServiceResponse'
+        '500':
+          description: Lỗi server
+
+  /company/contact/customer:
+    post:
+      tags:
+        - Company
+      summary: Lưu thông tin liên hệ khách hàng
+      description: Lưu thông tin liên hệ từ khách hàng
+      operationId: saveCustomerContact
+      requestBody:
+        description: Thông tin liên hệ từ khách hàng
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerContactBody'
+        required: true
+      responses:
+        '201':
+          description: Lưu thông tin liên hệ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Lỗi server
+
+  /company/footer-links:
+    get:
+      tags:
+        - Company
+      summary: Lấy footer links
+      description: Lấy danh sách các liên kết footer
+      operationId: getFooterLinks
+      responses:
+        '200':
+          description: Lấy footer links thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FooterLinksResponse'
+        '500':
+          description: Lỗi server
+
 components:
   schemas:
     LoginBody:
@@ -642,6 +844,245 @@ components:
         message:
           type: string
           example: 'Upload image successfully'
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Thao tác thành công'
+    CompanyInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Lấy thông tin công ty thành công'
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: 'Công ty TNHH ABC'
+            logo_url:
+              type: string
+              example: 'http://localhost:1236/statics/image/logo.jpg'
+            intro_text:
+              type: string
+              example: 'Giới thiệu về công ty ABC'
+            address:
+              type: string
+              example: '123 Đường ABC, Quận 1, TP.HCM'
+            tax_code:
+              type: string
+              example: '0123456789'
+            email:
+              type: string
+              example: 'info@abc.com'
+            welcome_content:
+              type: string
+              example: 'Chào mừng đến với công ty ABC'
+            img_intro:
+              type: string
+              example: 'http://localhost:1236/statics/image/intro.jpg'
+            created_at:
+              type: string
+              format: date-time
+              example: '2024-01-01T00:00:00.000Z'
+            updated_at:
+              type: string
+              format: date-time
+              example: '2024-01-01T00:00:00.000Z'
+    UpdateCompanyInfoBody:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Công ty TNHH ABC'
+        logo_url:
+          type: string
+          example: 'http://localhost:1236/statics/image/logo.jpg'
+        intro_text:
+          type: string
+          example: 'Giới thiệu về công ty ABC'
+        address:
+          type: string
+          example: '123 Đường ABC, Quận 1, TP.HCM'
+        tax_code:
+          type: string
+          example: '0123456789'
+        email:
+          type: string
+          example: 'info@abc.com'
+        welcome_content:
+          type: string
+          example: 'Chào mừng đến với công ty ABC'
+        img_intro:
+          type: string
+          example: 'http://localhost:1236/statics/image/intro.jpg'
+    ContactInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Lấy thông tin liên hệ thành công'
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            phone:
+              type: string
+              example: '0123456789'
+            email:
+              type: string
+              example: 'contact@abc.com'
+            address:
+              type: string
+              example: '123 Đường ABC, Quận 1, TP.HCM'
+            facebook_url:
+              type: string
+              example: 'https://facebook.com/abc'
+            zalo_url:
+              type: string
+              example: 'https://zalo.me/abc'
+            youtube_url:
+              type: string
+              example: 'https://youtube.com/abc'
+    ServicesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Lấy danh sách dịch vụ thành công'
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              title:
+                type: string
+                example: 'Dịch vụ ABC'
+              description:
+                type: string
+                example: 'Mô tả dịch vụ ABC'
+              image_url:
+                type: string
+                example: 'http://localhost:1236/statics/image/service1.jpg'
+              company_id:
+                type: integer
+                example: 1
+              is_delete:
+                type: boolean
+                example: false
+              created_at:
+                type: string
+                format: date-time
+                example: '2024-01-01T00:00:00.000Z'
+              updated_at:
+                type: string
+                format: date-time
+                example: '2024-01-01T00:00:00.000Z'
+    CreateServiceBody:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Dịch vụ ABC'
+        description:
+          type: string
+          example: 'Mô tả dịch vụ ABC'
+        image_url:
+          type: string
+          example: 'http://localhost:1236/statics/image/service1.jpg'
+        company_id:
+          type: integer
+          example: 1
+      required:
+        - title
+        - description
+    CreateServiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Tạo dịch vụ mới thành công'
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+    CustomerContactBody:
+      type: object
+      properties:
+        full_name:
+          type: string
+          example: 'Nguyễn Văn A'
+        phone_customer:
+          type: string
+          example: '0123456789'
+        message:
+          type: string
+          example: 'Tôi muốn tìm hiểu thêm về dịch vụ của công ty'
+      required:
+        - full_name
+        - phone_customer
+        - message
+    FooterLinksResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Lấy footer links thành công'
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              title:
+                type: string
+                example: 'Về chúng tôi'
+              url:
+                type: string
+                example: '/about'
+              column_position:
+                type: integer
+                example: 1
+              created_at:
+                type: string
+                format: date-time
+                example: '2024-01-01T00:00:00.000Z'
+              updated_at:
+                type: string
+                format: date-time
+                example: '2024-01-01T00:00:00.000Z'
   securitySchemes:
     BearerAuth:
       type: http

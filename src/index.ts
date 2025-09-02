@@ -35,6 +35,8 @@ app.use(helmet())
 app.use(cors())
 app.use('/doc-api', swaggerUI.serve, swaggerUI.setup(swaggerDocument))
 
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }))
+
 // ** limit request
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
