@@ -29,6 +29,8 @@ tags:
     description: Handle media uploads (images and videos)
   - name: Company
     description: Company information management
+  - name: Products
+    description: Product/Service management
 
 paths:
   /users/login:
@@ -653,6 +655,204 @@ paths:
         '500':
           description: Lỗi server
 
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Lấy danh sách sản phẩm/dịch vụ
+      description: Lấy danh sách tất cả sản phẩm/dịch vụ
+      operationId: getProducts
+      responses:
+        '200':
+          description: Lấy danh sách sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+        '500':
+          description: Lỗi server
+
+  /products/add:
+    post:
+      tags:
+        - Products
+      summary: Thêm sản phẩm/dịch vụ mới với upload ảnh
+      description: Tạo một sản phẩm/dịch vụ mới và upload ảnh từ máy tính
+      operationId: addProduct
+      requestBody:
+        description: Thông tin sản phẩm/dịch vụ mới với file ảnh
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: 'Sản phẩm ABC'
+                description:
+                  type: string
+                  example: 'Mô tả chi tiết sản phẩm ABC'
+                company_id:
+                  type: integer
+                  example: 1
+                detail_info:
+                  type: string
+                  example: 'Thông tin chi tiết về sản phẩm'
+                image:
+                  type: string
+                  format: binary
+                  description: 'File ảnh sản phẩm (JPG, JPEG, PNG)'
+              required:
+                - title
+                - description
+                - image
+      responses:
+        '201':
+          description: Thêm sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddProductResponse'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc lỗi upload ảnh
+        '500':
+          description: Lỗi server
+
+  /products/add-with-url:
+    post:
+      tags:
+        - Products
+      summary: Thêm sản phẩm/dịch vụ mới với URL ảnh có sẵn
+      description: Tạo một sản phẩm/dịch vụ mới với URL ảnh đã có
+      operationId: addProductWithUrl
+      requestBody:
+        description: Thông tin sản phẩm/dịch vụ mới với URL ảnh
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddProductBody'
+      responses:
+        '201':
+          description: Thêm sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddProductResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '500':
+          description: Lỗi server
+
+  /products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Lấy thông tin sản phẩm theo ID
+      description: Lấy thông tin chi tiết của một sản phẩm/dịch vụ
+      operationId: getProductById
+      parameters:
+        - name: id
+          in: path
+          description: ID của sản phẩm
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Lấy thông tin sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          description: Không tìm thấy sản phẩm
+        '500':
+          description: Lỗi server
+
+    put:
+      tags:
+        - Products
+      summary: Cập nhật sản phẩm/dịch vụ
+      description: Cập nhật thông tin sản phẩm/dịch vụ (hỗ trợ cả JSON với URL ảnh và multipart với upload ảnh mới)
+      operationId: updateProduct
+      parameters:
+        - name: id
+          in: path
+          description: ID của sản phẩm
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Thông tin sản phẩm cần cập nhật
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductBody'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: 'Sản phẩm ABC Updated'
+                description:
+                  type: string
+                  example: 'Mô tả chi tiết sản phẩm ABC đã cập nhật'
+                company_id:
+                  type: integer
+                  example: 1
+                detail_info:
+                  type: string
+                  example: 'Thông tin chi tiết về sản phẩm đã cập nhật'
+                image:
+                  type: string
+                  format: binary
+                  description: 'File ảnh sản phẩm mới (JPG, JPEG, PNG) - tùy chọn'
+      responses:
+        '200':
+          description: Cập nhật sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '404':
+          description: Không tìm thấy sản phẩm
+        '500':
+          description: Lỗi server
+
+    delete:
+      tags:
+        - Products
+      summary: Xóa sản phẩm/dịch vụ
+      description: Xóa sản phẩm/dịch vụ (soft delete)
+      operationId: deleteProduct
+      parameters:
+        - name: id
+          in: path
+          description: ID của sản phẩm
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Xóa sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Không tìm thấy sản phẩm
+        '500':
+          description: Lỗi server
+
 components:
   schemas:
     LoginBody:
@@ -1083,6 +1283,115 @@ components:
                 type: string
                 format: date-time
                 example: '2024-01-01T00:00:00.000Z'
+
+    AddProductBody:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Sản phẩm ABC'
+        description:
+          type: string
+          example: 'Mô tả chi tiết sản phẩm ABC'
+        image_url:
+          type: string
+          example: 'http://localhost:1236/statics/image/product1.jpg'
+        company_id:
+          type: integer
+          example: 1
+        detail_info:
+          type: string
+          example: 'Thông tin chi tiết về sản phẩm'
+      required:
+        - title
+        - description
+        - image_url
+
+    UpdateProductBody:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Sản phẩm ABC Updated'
+        description:
+          type: string
+          example: 'Mô tả chi tiết sản phẩm ABC đã cập nhật'
+        image_url:
+          type: string
+          example: 'http://localhost:1236/statics/image/product1_updated.jpg'
+        company_id:
+          type: integer
+          example: 1
+        detail_info:
+          type: string
+          example: 'Thông tin chi tiết về sản phẩm đã cập nhật'
+
+    ProductsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Products retrieved successfully'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+
+    ProductResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Product retrieved successfully'
+        data:
+          $ref: '#/components/schemas/Product'
+
+    AddProductResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 'Product added successfully'
+        data:
+          $ref: '#/components/schemas/Product'
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: 'Sản phẩm ABC'
+        description:
+          type: string
+          example: 'Mô tả chi tiết sản phẩm ABC'
+        image_url:
+          type: string
+          example: 'http://localhost:1236/statics/image/product1.jpg'
+        company_id:
+          type: integer
+          example: 1
+        detail_info:
+          type: string
+          example: 'Thông tin chi tiết về sản phẩm'
+        created_at:
+          type: string
+          format: date-time
+          example: '2024-01-01T00:00:00.000Z'
+        is_delete:
+          type: boolean
+          example: false
   securitySchemes:
     BearerAuth:
       type: http

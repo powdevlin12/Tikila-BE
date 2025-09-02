@@ -111,7 +111,8 @@ export class MySQLService {
           image_url VARCHAR(500),
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           is_delete BOOLEAN DEFAULT FALSE,
-          company_id INT
+          company_id INT,
+          detail_info TEXT
         )
       `)
 

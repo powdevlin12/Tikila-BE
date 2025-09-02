@@ -51,6 +51,41 @@ export const handleUploadImage = async (req: Request) => {
   })
 }
 
+export const handleUploadImageWithFields = async (req: Request) => {
+  const form = formidable({
+    uploadDir: UPLOAD_IMG_TEMP_FOLDER,
+    maxFiles: 4,
+    keepExtensions: true,
+    maxFileSize: 5000 * 1024,
+    maxTotalFileSize: 5000 * 1024 * 4,
+    filter: function ({ name, originalFilename, mimetype }) {
+      const valid = name === 'image' && Boolean(mimetype?.includes('image/'))
+      if (!valid) {
+        form.emit('error' as any, new Error('File type is not valid') as any)
+      }
+
+      return valid
+    }
+  })
+
+  return new Promise<{ files: File[]; fields: any }>((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        reject(err)
+      }
+
+      if (isEmpty(files)) {
+        reject(new Error('File type is not empty'))
+      }
+
+      resolve({
+        files: files.image as File[],
+        fields
+      })
+    })
+  })
+}
+
 export const handleUploadVideo = async (req: Request) => {
   const date = new Date().getTime()
   const form = formidable({
