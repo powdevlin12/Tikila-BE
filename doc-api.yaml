@@ -31,6 +31,8 @@ tags:
     description: Company information management
   - name: Products
     description: Product/Service management
+  - name: Contact Customer
+    description: Customer contact management
 
 paths:
   /users/login:
@@ -853,6 +855,103 @@ paths:
         '500':
           description: Lỗi server
 
+  /contact-customer:
+    post:
+      tags:
+        - Contact Customer
+      summary: Lưu thông tin liên hệ khách hàng
+      description: Lưu thông tin liên hệ từ khách hàng
+      operationId: saveCustomerContactNew
+      requestBody:
+        description: Thông tin liên hệ từ khách hàng
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerContactBody'
+        required: true
+      responses:
+        '201':
+          description: Lưu thông tin liên hệ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactCustomerResponse'
+        '500':
+          description: Lỗi server
+
+    get:
+      tags:
+        - Contact Customer
+      summary: Lấy danh sách liên hệ khách hàng
+      description: Lấy tất cả thông tin liên hệ khách hàng (dành cho admin)
+      operationId: getAllContacts
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lấy danh sách liên hệ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactCustomerListResponse'
+        '500':
+          description: Lỗi server
+
+  /contact-customer/{id}:
+    get:
+      tags:
+        - Contact Customer
+      summary: Lấy thông tin liên hệ theo ID
+      description: Lấy thông tin chi tiết của một liên hệ khách hàng
+      operationId: getContactById
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID của liên hệ khách hàng
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lấy thông tin liên hệ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactCustomerResponse'
+        '404':
+          description: Không tìm thấy liên hệ
+        '500':
+          description: Lỗi server
+
+    delete:
+      tags:
+        - Contact Customer
+      summary: Xóa liên hệ khách hàng
+      description: Xóa một liên hệ khách hàng (dành cho admin)
+      operationId: deleteContact
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID của liên hệ khách hàng cần xóa
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Xóa liên hệ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Không tìm thấy liên hệ
+        '500':
+          description: Lỗi server
+
 components:
   schemas:
     LoginBody:
@@ -1245,10 +1344,80 @@ components:
         message:
           type: string
           example: 'Tôi muốn tìm hiểu thêm về dịch vụ của công ty'
+        service_id:
+          type: integer
+          example: 1
+          description: 'ID của dịch vụ liên quan (tùy chọn)'
       required:
         - full_name
         - phone_customer
         - message
+
+    ContactCustomerResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Contact saved successfully'
+        result:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            full_name:
+              type: string
+              example: 'Nguyễn Văn A'
+            phone_customer:
+              type: string
+              example: '0123456789'
+            message:
+              type: string
+              example: 'Tôi muốn tìm hiểu thêm về dịch vụ của công ty'
+            service_id:
+              type: integer
+              example: 1
+            service_title:
+              type: string
+              example: 'Dịch vụ tư vấn'
+            created_at:
+              type: string
+              format: date-time
+              example: '2023-10-01T10:00:00Z'
+
+    ContactCustomerListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Get contacts successfully'
+        result:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              full_name:
+                type: string
+                example: 'Nguyễn Văn A'
+              phone_customer:
+                type: string
+                example: '0123456789'
+              message:
+                type: string
+                example: 'Tôi muốn tìm hiểu thêm về dịch vụ của công ty'
+              service_id:
+                type: integer
+                example: 1
+              service_title:
+                type: string
+                example: 'Dịch vụ tư vấn'
+              created_at:
+                type: string
+                format: date-time
+                example: '2023-10-01T10:00:00Z'
     FooterLinksResponse:
       type: object
       properties:

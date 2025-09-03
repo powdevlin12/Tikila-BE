@@ -133,7 +133,9 @@ export class MySQLService {
           full_name VARCHAR(100),
           phone_customer VARCHAR(11),
           message VARCHAR(500),
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          service_id INT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (service_id) REFERENCES services(id)
         )
       `)
 
