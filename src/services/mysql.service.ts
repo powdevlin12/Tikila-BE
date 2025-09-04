@@ -38,6 +38,17 @@ export class MySQLService {
     }
   }
 
+  public async connectWithoutCreateTables(): Promise<void> {
+    try {
+      const connection = await this.pool.getConnection()
+      connection.release()
+      console.log('✅ Connected to MySQL database successfully!')
+    } catch (error) {
+      console.error('❌ Error connecting to MySQL:', error)
+      throw error
+    }
+  }
+
   public async query(sql: string, params?: any[]): Promise<any> {
     try {
       const [results] = await this.pool.execute(sql, params)
@@ -88,7 +99,11 @@ export class MySQLService {
           welcome_content VARCHAR(500),
           version_info INT,
           contact_id INT,
-          img_intro TEXT
+          img_intro VARCHAR(500),
+          BANNER VARCHAR(255),
+          COUNT_CUSTOMER INT DEFAULT 0,
+          COUNT_CUSTOMER_SATISFY INT DEFAULT 0,
+          COUNT_QUANLITY INT DEFAULT 100
         )
       `)
 
@@ -142,6 +157,55 @@ export class MySQLService {
       console.log('✅ All tables created successfully!')
     } catch (error) {
       console.error('❌ Error creating tables:', error)
+      throw error
+    }
+  }
+
+  public async updateCompanyInfoTable(): Promise<void> {
+    try {
+      console.log('🔄 Updating company_info table structure...')
+
+      // Kiểm tra và thêm các columns mới
+      const columnsToAdd = [
+        { name: 'img_intro', definition: 'VARCHAR(500)' },
+        { name: 'BANNER', definition: 'VARCHAR(255)' },
+        { name: 'COUNT_CUSTOMER', definition: 'INT DEFAULT 0' },
+        { name: 'COUNT_CUSTOMER_SATISFY', definition: 'INT DEFAULT 0' },
+        { name: 'COUNT_QUANLITY', definition: 'INT DEFAULT 100' }
+      ]
+
+      for (const column of columnsToAdd) {
+        try {
+          // Kiểm tra xem column đã tồn tại chưa
+          const checkResult = await this.query(
+            `
+            SELECT COLUMN_NAME 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'company_info' 
+            AND COLUMN_NAME = ?
+          `,
+            [column.name]
+          )
+
+          // Nếu column chưa tồn tại thì thêm vào
+          if (checkResult.length === 0) {
+            await this.query(`
+              ALTER TABLE company_info 
+              ADD COLUMN ${column.name} ${column.definition}
+            `)
+            console.log(`✅ Added column ${column.name}`)
+          } else {
+            console.log(`ℹ️ Column ${column.name} already exists`)
+          }
+        } catch (columnError) {
+          console.error(`❌ Error adding column ${column.name}:`, columnError)
+        }
+      }
+
+      console.log('✅ Company info table updated successfully!')
+    } catch (error) {
+      console.error('❌ Error updating company_info table:', error)
       throw error
     }
   }

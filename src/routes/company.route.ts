@@ -14,6 +14,7 @@ companyRouter.put('/info', validate(accessTokenValidator), companyController.upd
 companyRouter.put('/info/logo', companyController.updateCompanyLogo)
 // Cập nhật ảnh giới thiệu
 companyRouter.put('/info/img-intro', companyController.updateCompanyImgIntro)
+companyRouter.put('/info/banner', companyController.updateCompanyBanner)
 // Lấy thông tin liên hệ
 companyRouter.get('/contact', companyController.getContactInfo)
 

@@ -558,6 +558,34 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
         '500':
           description: Lỗi server
+  /company/info/banner:
+    put:
+      tags:
+        - Company
+      summary: Cập nhật banner
+      description: Cập nhật banner của công ty
+      operationId: updateCompanyBanner
+      requestBody:
+        description: File banner mới
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File banner (JPG, JPEG, PNG)
+        required: true
+      responses:
+        '200':
+          description: Cập nhật banner thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Lỗi server
 
   /company/contact:
     get:
@@ -1226,6 +1254,15 @@ components:
         img_intro:
           type: string
           example: 'http://localhost:1236/statics/image/intro.jpg'
+        COUNT_CUSTOMER:
+          type: integer
+          example: 100
+        COUNT_CUSTOMER_SATISFY:
+          type: integer
+          example: 80
+        COUNT_QUANLITY:
+          type: integer
+          example: 100
     ContactInfoResponse:
       type: object
       properties:

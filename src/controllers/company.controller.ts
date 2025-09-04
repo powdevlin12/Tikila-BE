@@ -76,15 +76,51 @@ export class CompanyController {
     }
   }
 
+  async updateCompanyBanner(req: Request, res: Response) {
+    try {
+      const url = await mediaService.handleUploadImage(req)
+
+      const updateQuery = `
+        UPDATE company_info 
+        SET BANNER = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = 1
+      `
+
+      await mysqlService.query(updateQuery, [url?.[0]?.url ?? ''])
+
+      return res.status(200).json({
+        success: true,
+        message: 'Cập nhật banner công ty thành công'
+      })
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Lỗi server khi cập nhật banner công ty'
+      })
+    }
+  }
+
   // Cập nhật thông tin công ty
   async updateCompanyInfo(req: Request, res: Response) {
     try {
-      const { name, logo_url, intro_text, address, tax_code, email, welcome_content, img_intro } = req.body
+      const {
+        name,
+        logo_url,
+        intro_text,
+        address,
+        tax_code,
+        email,
+        welcome_content,
+        img_intro,
+        COUNT_CUSTOMER,
+        COUNT_CUSTOMER_SATISFY,
+        COUNT_QUANLITY
+      } = req.body
 
       const updateQuery = `
         UPDATE company_info 
         SET name = ?, logo_url = ?, intro_text = ?, address = ?, 
-            tax_code = ?, email = ?, welcome_content = ?, img_intro = ?,
+            tax_code = ?, email = ?, welcome_content = ?, img_intro = ?, COUNT_CUSTOMER = ?, COUNT_CUSTOMER_SATISFY = ?, COUNT_QUANLITY = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = 1
       `
@@ -97,7 +133,10 @@ export class CompanyController {
         tax_code,
         email,
         welcome_content,
-        img_intro
+        img_intro,
+        COUNT_CUSTOMER || 0,
+        COUNT_CUSTOMER_SATISFY || 0,
+        COUNT_QUANLITY || 100
       ])
 
       return res.status(200).json({
