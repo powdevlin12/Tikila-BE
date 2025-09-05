@@ -33,6 +33,8 @@ tags:
     description: Product/Service management
   - name: Contact Customer
     description: Customer contact management
+  - name: Footer Links
+    description: Footer links management
 
 paths:
   /users/login:
@@ -980,6 +982,185 @@ paths:
         '500':
           description: Lỗi server
 
+  /footer-links:
+    get:
+      tags:
+        - Footer Links
+      summary: Lấy tất cả footer links
+      description: Lấy danh sách tất cả footer links được sắp xếp theo column và ID
+      operationId: getAllFooterLinks
+      responses:
+        '200':
+          description: Lấy footer links thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FooterLinksListResponse'
+        '500':
+          description: Lỗi server
+
+    post:
+      tags:
+        - Footer Links
+      summary: Tạo footer link mới
+      description: Tạo một footer link mới
+      operationId: createFooterLink
+      requestBody:
+        description: Thông tin footer link mới
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFooterLinkBody'
+        required: true
+      responses:
+        '201':
+          description: Tạo footer link thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateFooterLinkResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '500':
+          description: Lỗi server
+
+  /footer-links/{id}:
+    get:
+      tags:
+        - Footer Links
+      summary: Lấy footer link theo ID
+      description: Lấy thông tin chi tiết của một footer link
+      operationId: getFooterLinkById
+      parameters:
+        - name: id
+          in: path
+          description: ID của footer link
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Lấy footer link thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FooterLinkResponse'
+        '404':
+          description: Không tìm thấy footer link
+        '500':
+          description: Lỗi server
+
+    put:
+      tags:
+        - Footer Links
+      summary: Cập nhật footer link
+      description: Cập nhật thông tin của một footer link
+      operationId: updateFooterLink
+      parameters:
+        - name: id
+          in: path
+          description: ID của footer link
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        description: Thông tin footer link cần cập nhật
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFooterLinkBody'
+        required: true
+      responses:
+        '200':
+          description: Cập nhật footer link thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '404':
+          description: Không tìm thấy footer link
+        '500':
+          description: Lỗi server
+
+    delete:
+      tags:
+        - Footer Links
+      summary: Xóa footer link
+      description: Xóa một footer link theo ID
+      operationId: deleteFooterLink
+      parameters:
+        - name: id
+          in: path
+          description: ID của footer link cần xóa
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Xóa footer link thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Không tìm thấy footer link
+        '500':
+          description: Lỗi server
+
+  /footer-links/column/{columnPosition}:
+    get:
+      tags:
+        - Footer Links
+      summary: Lấy footer links theo cột
+      description: Lấy tất cả footer links thuộc một cột cụ thể
+      operationId: getFooterLinksByColumn
+      parameters:
+        - name: columnPosition
+          in: path
+          description: Vị trí cột (1, 2, 3, ...)
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Lấy footer links theo cột thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FooterLinksListResponse'
+        '500':
+          description: Lỗi server
+
+    delete:
+      tags:
+        - Footer Links
+      summary: Xóa tất cả footer links theo cột
+      description: Xóa tất cả footer links thuộc một cột cụ thể
+      operationId: deleteFooterLinksByColumn
+      parameters:
+        - name: columnPosition
+          in: path
+          description: Vị trí cột cần xóa
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Xóa footer links theo cột thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteFooterLinksResponse'
+        '500':
+          description: Lỗi server
+
 components:
   schemas:
     LoginBody:
@@ -1598,6 +1779,122 @@ components:
         is_delete:
           type: boolean
           example: false
+
+    # Footer Links Schemas
+    FooterLink:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: 'Về chúng tôi'
+        column_position:
+          type: integer
+          example: 1
+        url:
+          type: string
+          example: '/about'
+        title_column:
+          type: string
+          example: 'Công ty'
+        created_at:
+          type: string
+          format: date-time
+          example: '2024-01-01T00:00:00.000Z'
+
+    CreateFooterLinkBody:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Liên hệ'
+          maxLength: 255
+        column_position:
+          type: integer
+          example: 1
+          minimum: 1
+        url:
+          type: string
+          example: '/contact'
+          maxLength: 255
+        title_column:
+          type: string
+          example: 'Công ty'
+          maxLength: 255
+      required:
+        - title
+        - column_position
+        - url
+        - title_column
+
+    UpdateFooterLinkBody:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Liên hệ mới'
+          maxLength: 255
+        column_position:
+          type: integer
+          example: 2
+          minimum: 1
+        url:
+          type: string
+          example: '/new-contact'
+          maxLength: 255
+        title_column:
+          type: string
+          example: 'Hỗ trợ'
+          maxLength: 255
+
+    FooterLinkResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Get footer link successfully'
+        data:
+          $ref: '#/components/schemas/FooterLink'
+
+    FooterLinksListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Get footer links successfully'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FooterLink'
+
+    CreateFooterLinkResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Create footer link successfully'
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+
+    DeleteFooterLinksResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Deleted 3 footer links successfully'
+        data:
+          type: object
+          properties:
+            deletedCount:
+              type: integer
+              example: 3
+
   securitySchemes:
     BearerAuth:
       type: http
