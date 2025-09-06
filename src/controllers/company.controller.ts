@@ -267,6 +267,56 @@ export class CompanyController {
       })
     }
   }
+
+  // Lấy nội dung giới thiệu chi tiết
+  async getIntroDetail(req: Request, res: Response) {
+    try {
+      const introDetail = await mysqlService.query('SELECT intro_text_detail FROM company_info LIMIT 1')
+
+      return res.status(200).json({
+        success: true,
+        message: 'Lấy nội dung giới thiệu chi tiết thành công',
+        data: introDetail[0] || {}
+      })
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Lỗi server khi lấy nội dung giới thiệu chi tiết'
+      })
+    }
+  }
+
+  // Cập nhật nội dung giới thiệu chi tiết
+  async updateIntroDetail(req: Request, res: Response) {
+    try {
+      const { intro_text_detail } = req.body
+
+      if (!intro_text_detail) {
+        return res.status(400).json({
+          success: false,
+          message: 'Nội dung giới thiệu chi tiết không được để trống'
+        })
+      }
+
+      const updateQuery = `
+        UPDATE company_info 
+        SET intro_text_detail = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = 1
+      `
+
+      await mysqlService.query(updateQuery, [intro_text_detail])
+
+      return res.status(200).json({
+        success: true,
+        message: 'Cập nhật nội dung giới thiệu chi tiết thành công'
+      })
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Lỗi server khi cập nhật nội dung giới thiệu chi tiết'
+      })
+    }
+  }
 }
 
 export const companyController = new CompanyController()

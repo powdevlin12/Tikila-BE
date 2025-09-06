@@ -30,4 +30,10 @@ companyRouter.post('/contact/customer', companyController.saveCustomerContact)
 // Lấy footer links
 companyRouter.get('/footer-links', companyController.getFooterLinks)
 
+// Lấy nội dung giới thiệu chi tiết
+companyRouter.get('/intro-detail', companyController.getIntroDetail)
+
+// Cập nhật nội dung giới thiệu chi tiết
+companyRouter.put('/intro-detail', validate(accessTokenValidator), companyController.updateIntroDetail)
+
 export default companyRouter
