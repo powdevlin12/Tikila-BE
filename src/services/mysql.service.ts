@@ -103,7 +103,8 @@ export class MySQLService {
           BANNER VARCHAR(255),
           COUNT_CUSTOMER INT DEFAULT 0,
           COUNT_CUSTOMER_SATISFY INT DEFAULT 0,
-          COUNT_QUANLITY INT DEFAULT 100
+          COUNT_QUANLITY INT DEFAULT 100,
+          intro_text_detail TEXT
         )
       `)
 
@@ -166,13 +167,7 @@ export class MySQLService {
       console.log('🔄 Updating company_info table structure...')
 
       // Kiểm tra và thêm các columns mới
-      const columnsToAdd = [
-        { name: 'img_intro', definition: 'VARCHAR(500)' },
-        { name: 'BANNER', definition: 'VARCHAR(255)' },
-        { name: 'COUNT_CUSTOMER', definition: 'INT DEFAULT 0' },
-        { name: 'COUNT_CUSTOMER_SATISFY', definition: 'INT DEFAULT 0' },
-        { name: 'COUNT_QUANLITY', definition: 'INT DEFAULT 100' }
-      ]
+      const columnsToAdd = [{ name: 'intro_text_detail', definition: 'TEXT' }]
 
       for (const column of columnsToAdd) {
         try {
