@@ -11,10 +11,10 @@ companyRouter.get('/info', companyController.getCompanyInfo)
 // Cập nhật thông tin công ty
 companyRouter.put('/info', validate(accessTokenValidator), companyController.updateCompanyInfo)
 // Cập nhật ảnh logo công ty
-companyRouter.put('/info/logo', companyController.updateCompanyLogo)
+companyRouter.put('/info/logo', validate(accessTokenValidator), companyController.updateCompanyLogo)
 // Cập nhật ảnh giới thiệu
-companyRouter.put('/info/img-intro', companyController.updateCompanyImgIntro)
-companyRouter.put('/info/banner', companyController.updateCompanyBanner)
+companyRouter.put('/info/img-intro', validate(accessTokenValidator), companyController.updateCompanyImgIntro)
+companyRouter.put('/info/banner', validate(accessTokenValidator), companyController.updateCompanyBanner)
 // Lấy thông tin liên hệ
 companyRouter.get('/contact', companyController.getContactInfo)
 
@@ -22,7 +22,7 @@ companyRouter.get('/contact', companyController.getContactInfo)
 companyRouter.get('/services', companyController.getServices)
 
 // Thêm dịch vụ mới
-companyRouter.post('/services', companyController.createService)
+companyRouter.post('/services', validate(accessTokenValidator), companyController.createService)
 
 // Lưu thông tin liên hệ từ khách hàng
 companyRouter.post('/contact/customer', companyController.saveCustomerContact)
