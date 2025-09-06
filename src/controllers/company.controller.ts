@@ -103,41 +103,53 @@ export class CompanyController {
   // Cập nhật thông tin công ty
   async updateCompanyInfo(req: Request, res: Response) {
     try {
-      const {
-        name,
-        logo_url,
-        intro_text,
-        address,
-        tax_code,
-        email,
-        welcome_content,
-        img_intro,
-        COUNT_CUSTOMER,
-        COUNT_CUSTOMER_SATISFY,
-        COUNT_QUANLITY
-      } = req.body
+      const updateData = req.body
+
+      // Lọc ra những trường có dữ liệu (không undefined, null hoặc empty string)
+      const fieldsToUpdate: string[] = []
+      const values: any[] = []
+
+      // Mapping các field với tên column trong database
+      const fieldMapping: { [key: string]: string } = {
+        name: 'name',
+        logo_url: 'logo_url',
+        intro_text: 'intro_text',
+        address: 'address',
+        tax_code: 'tax_code',
+        email: 'email',
+        welcome_content: 'welcome_content',
+        img_intro: 'img_intro',
+        COUNT_CUSTOMER: 'COUNT_CUSTOMER',
+        COUNT_CUSTOMER_SATISFY: 'COUNT_CUSTOMER_SATISFY',
+        COUNT_QUANLITY: 'COUNT_QUANLITY'
+      }
+
+      // Duyệt qua các field được gửi lên
+      Object.keys(updateData).forEach((key) => {
+        if (fieldMapping[key] && updateData[key] !== undefined && updateData[key] !== null) {
+          fieldsToUpdate.push(`${fieldMapping[key]} = ?`)
+          values.push(updateData[key])
+        }
+      })
+
+      // Nếu không có field nào để update
+      if (fieldsToUpdate.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Không có dữ liệu để cập nhật'
+        })
+      }
+
+      // Thêm updated_at vào cuối
+      fieldsToUpdate.push('updated_at = CURRENT_TIMESTAMP')
 
       const updateQuery = `
         UPDATE company_info 
-        SET name = ?, logo_url = ?, intro_text = ?, address = ?, 
-            tax_code = ?, email = ?, welcome_content = ?, img_intro = ?, COUNT_CUSTOMER = ?, COUNT_CUSTOMER_SATISFY = ?, COUNT_QUANLITY = ?,
-            updated_at = CURRENT_TIMESTAMP
+        SET ${fieldsToUpdate.join(', ')}
         WHERE id = 1
       `
 
-      await mysqlService.query(updateQuery, [
-        name,
-        logo_url,
-        intro_text,
-        address,
-        tax_code,
-        email,
-        welcome_content,
-        img_intro,
-        COUNT_CUSTOMER || 0,
-        COUNT_CUSTOMER_SATISFY || 0,
-        COUNT_QUANLITY || 100
-      ])
+      await mysqlService.query(updateQuery, values)
 
       return res.status(200).json({
         success: true,
