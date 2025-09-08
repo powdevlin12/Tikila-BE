@@ -18,6 +18,9 @@ companyRouter.put('/info/banner', validate(accessTokenValidator), companyControl
 // Lấy thông tin liên hệ
 companyRouter.get('/contact', companyController.getContactInfo)
 
+// Cập nhật thông tin liên hệ
+companyRouter.put('/contact', validate(accessTokenValidator), companyController.updateContactInfo)
+
 // Lấy danh sách dịch vụ
 companyRouter.get('/services', companyController.getServices)
 

@@ -181,6 +181,72 @@ export class CompanyController {
     }
   }
 
+  // Cập nhật thông tin liên hệ
+  async updateContactInfo(req: Request, res: Response) {
+    try {
+      const { phone, facebook_link, zalo_link, tiktok_link } = req.body
+
+      // Kiểm tra xem đã có record nào chưa
+      const existingContact = await mysqlService.query('SELECT id FROM contact_company LIMIT 1')
+
+      if (existingContact.length === 0) {
+        // Tạo mới nếu chưa có
+        const insertQuery = `
+          INSERT INTO contact_company (phone, facebook_link, zalo_link, tiktok_link, created_at)
+          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        `
+        await mysqlService.query(insertQuery, [
+          phone || null,
+          facebook_link || null,
+          zalo_link || null,
+          tiktok_link || null
+        ])
+      } else {
+        // Cập nhật chỉ những trường được gửi lên
+        const fieldsToUpdate: string[] = []
+        const values: any[] = []
+
+        if (phone !== undefined) {
+          fieldsToUpdate.push('phone = ?')
+          values.push(phone || null)
+        }
+        if (facebook_link !== undefined) {
+          fieldsToUpdate.push('facebook_link = ?')
+          values.push(facebook_link || null)
+        }
+        if (zalo_link !== undefined) {
+          fieldsToUpdate.push('zalo_link = ?')
+          values.push(zalo_link || null)
+        }
+        if (tiktok_link !== undefined) {
+          fieldsToUpdate.push('tiktok_link = ?')
+          values.push(tiktok_link || null)
+        }
+
+        if (fieldsToUpdate.length > 0) {
+          const updateQuery = `
+            UPDATE contact_company 
+            SET ${fieldsToUpdate.join(', ')}
+            WHERE id = ?
+          `
+          values.push(existingContact[0].id)
+          await mysqlService.query(updateQuery, values)
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Cập nhật thông tin liên hệ thành công'
+      })
+    } catch (error) {
+      console.error('Error updating contact info:', error)
+      return res.status(500).json({
+        success: false,
+        message: 'Lỗi server khi cập nhật thông tin liên hệ'
+      })
+    }
+  }
+
   // Lấy danh sách dịch vụ
   async getServices(req: Request, res: Response) {
     try {

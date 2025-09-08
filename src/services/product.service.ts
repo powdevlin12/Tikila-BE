@@ -35,7 +35,7 @@ export class ProductService {
 
   static async getProducts() {
     const sql = `
-      SELECT id, title, description, image_url, company_id, detail_info, created_at 
+      SELECT id, title, description, image_url, company_id, detail_info, created_at, is_delete 
       FROM services 
       WHERE is_delete = FALSE
       ORDER BY created_at DESC
