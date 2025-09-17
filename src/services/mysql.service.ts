@@ -155,6 +155,17 @@ export class MySQLService {
         )
       `)
 
+      await this.query(`
+        CREATE TABLE IF NOT EXISTS star_customer (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          star INT NOT NULL CHECK (star >= 1 AND star <= 5),
+          name_customer VARCHAR(255) NOT NULL,
+          content TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+      `)
+
       console.log('✅ All tables created successfully!')
     } catch (error) {
       console.error('❌ Error creating tables:', error)
