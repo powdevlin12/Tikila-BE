@@ -17,10 +17,6 @@ import YAML from 'yaml'
 import fs from 'fs'
 import path from 'path'
 import swaggerUI from 'swagger-ui-express'
-import tweetRouter from './routes/tweets.router'
-import { hashTagsRoute } from './routes/hashtags.router'
-import { bookmarkRoute } from './routes/bookmarks.route'
-import { likesRoute } from './routes/like.route'
 import productRouter from './routes/product.route'
 import contactCustomerRouter from './routes/contact-customer.route'
 import footerLinkRoute from './routes/footer-link.route'
@@ -56,10 +52,6 @@ app.use(limiter)
 app.use('/users', userRouter)
 app.use('/medias', mediasRouter)
 app.use('/statics', staticsRouter)
-app.use('/tweets', tweetRouter)
-app.use('/hash-tags', hashTagsRoute)
-app.use('/bookmarks', bookmarkRoute)
-app.use('/likes', likesRoute)
 app.use('/company', companyRouter)
 app.use('/products', productRouter)
 app.use('/contact-customer', contactCustomerRouter)

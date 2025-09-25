@@ -1,15 +1,10 @@
 import dotenv from 'dotenv'
 import { Collection, Db, MongoClient } from 'mongodb'
 import { envConfig, TEnvironment } from '~/constants/config'
-import { BookmarkSchema } from '~/models/schemas/Bookmark.schema'
 import Follower from '~/models/schemas/Follower.schema'
-import { HashTags } from '~/models/schemas/HashTags.schema'
-import { LikeSchema } from '~/models/schemas/Like.schema'
 import { RefreshToken } from '~/models/schemas/RefershToken.schema'
-import Tweet from '~/models/schemas/Tweet.schema'
 import User from '~/models/schemas/User.schema'
 import argv from 'minimist'
-import { HabitsSchema } from '~/models/schemas/Habit.schema'
 
 dotenv.config()
 
@@ -80,14 +75,8 @@ export default class DatabaseConnect {
       // ** check collection exist
       const requiredCollections = [
         envConfig.collectionUsers,
-        envConfig.collectionBookmarks,
         envConfig.collectionFollower,
-        envConfig.collectionHashTags,
-        envConfig.collectionLikes,
-        envConfig.collectionRefreshTokens,
-        envConfig.collectionTweets,
-        envConfig.collectionUsers,
-        envConfig.collectionHabits
+        envConfig.collectionRefreshTokens
       ]
       await this.checkAndCreateDB()
       await this.createCollections(requiredCollections)
@@ -139,32 +128,12 @@ export default class DatabaseConnect {
     return this.db.collection(envConfig.collectionUsers)
   }
 
-  get tweets(): Collection<Tweet> {
-    return this.db.collection(envConfig.collectionTweets)
-  }
-
   get refreshTokens(): Collection<RefreshToken> {
     return this.db.collection(envConfig.collectionRefreshTokens)
   }
 
   get followers(): Collection<Follower> {
     return this.db.collection(envConfig.collectionFollower)
-  }
-
-  get hashTags(): Collection<HashTags> {
-    return this.db.collection(envConfig.collectionHashTags)
-  }
-
-  get bookmarks(): Collection<BookmarkSchema> {
-    return this.db.collection(envConfig.collectionBookmarks)
-  }
-
-  get likes(): Collection<LikeSchema> {
-    return this.db.collection(envConfig.collectionLikes)
-  }
-
-  get habits(): Collection<HabitsSchema> {
-    return this.db.collection(envConfig.collectionHabits)
   }
 
   static getInstance() {
