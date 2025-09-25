@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { ProductService } from '~/services/product.service'
 import mediaService from '~/services/media.service'
+import { deleteOldImage } from '~/utils/file'
 
 export class ProductController {
   static async addProduct(req: Request, res: Response, next: NextFunction) {
@@ -139,9 +140,14 @@ export class ProductController {
     try {
       const { id } = req.params
 
+      // Get current product data before updating (to get current image URL)
+      const currentProduct = await ProductService.getProductById(parseInt(id))
+      const currentImageUrl = currentProduct?.image_url
+
       // Try to parse as multipart first (if image is being uploaded)
       let title, description, image_url, company_id, detail_info
       let isMultipart = false
+      let hasNewImage = false
 
       try {
         // Check if content-type is multipart/form-data
@@ -154,6 +160,7 @@ export class ProductController {
 
           if (result.images && result.images.length > 0) {
             image_url = result.images[0].url
+            hasNewImage = true
           }
 
           // Extract fields from the form data
@@ -181,6 +188,11 @@ export class ProductController {
         image_url = body.image_url
         company_id = body.company_id
         detail_info = body.detail_info
+
+        // Check if new image URL is different from current
+        if (image_url && image_url !== currentImageUrl) {
+          hasNewImage = true
+        }
       }
 
       const updated = await ProductService.updateProduct(parseInt(id), {
@@ -190,6 +202,11 @@ export class ProductController {
         company_id,
         detail_info
       })
+
+      // Delete old image if new image was uploaded and update was successful
+      if (updated && hasNewImage && currentImageUrl && image_url !== currentImageUrl) {
+        deleteOldImage(currentImageUrl)
+      }
 
       if (!updated) {
         return res.status(404).json({

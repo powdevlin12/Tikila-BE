@@ -1,8 +1,14 @@
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, unlinkSync } from 'fs'
 import formidable, { File } from 'formidable'
 import { Request } from 'express'
 import { isEmpty } from 'lodash'
-import { UPLOAD_IMG_TEMP_FOLDER, UPLOAD_VIDEO_FOLDER, UPLOAD_VIDEO_TEMP_FOLDER } from '~/constants/dir'
+import path from 'path'
+import {
+  UPLOAD_IMG_TEMP_FOLDER,
+  UPLOAD_VIDEO_FOLDER,
+  UPLOAD_VIDEO_TEMP_FOLDER,
+  UPLOAD_IMG_FOLDER
+} from '~/constants/dir'
 
 export const initFolder = () => {
   ;[UPLOAD_VIDEO_TEMP_FOLDER, UPLOAD_IMG_TEMP_FOLDER].map((dir) => {
@@ -126,4 +132,27 @@ export const handleUploadVideo = async (req: Request) => {
       }
     })
   })
+}
+
+export const deleteOldImage = (imageUrl: string): void => {
+  if (!imageUrl) return
+
+  try {
+    // Extract filename from URL (e.g., "http://localhost:3000/statics/image/filename.jpg" -> "filename.jpg")
+    const urlParts = imageUrl.split('/')
+    const fileName = urlParts[urlParts.length - 1]
+
+    if (!fileName) return
+
+    // Build full path to the image file
+    const fullPath = path.resolve(UPLOAD_IMG_FOLDER, fileName)
+
+    // Check if file exists and delete it
+    if (existsSync(fullPath)) {
+      unlinkSync(fullPath)
+      console.log(`Deleted old image: ${fileName}`)
+    }
+  } catch (error) {
+    console.error('Error deleting old image:', error)
+  }
 }

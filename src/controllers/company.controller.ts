@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import mediaService from '~/services/media.service'
 import mysqlService from '~/services/mysql.service'
+import { deleteOldImage } from '~/utils/file'
 
 export class CompanyController {
   // Lấy thông tin công ty
@@ -30,6 +31,11 @@ export class CompanyController {
 
   async updateCompanyLogo(req: Request, res: Response) {
     try {
+      // Get current logo URL before updating
+      const getCurrentLogoQuery = `SELECT logo_url FROM company_info WHERE id = 1`
+      const currentData = await mysqlService.query(getCurrentLogoQuery)
+      const currentLogoUrl = currentData[0]?.logo_url
+
       const url = await mediaService.handleUploadImage(req)
 
       const updateQuery = `
@@ -39,6 +45,11 @@ export class CompanyController {
       `
 
       await mysqlService.query(updateQuery, [url?.[0]?.url ?? ''])
+
+      // Delete old image after successful update
+      if (currentLogoUrl) {
+        deleteOldImage(currentLogoUrl)
+      }
 
       return res.status(200).json({
         success: true,
@@ -54,6 +65,11 @@ export class CompanyController {
 
   async updateCompanyImgIntro(req: Request, res: Response) {
     try {
+      // Get current img_intro URL before updating
+      const getCurrentImgQuery = `SELECT img_intro FROM company_info WHERE id = 1`
+      const currentData = await mysqlService.query(getCurrentImgQuery)
+      const currentImgUrl = currentData[0]?.img_intro
+
       const url = await mediaService.handleUploadImage(req)
 
       const updateQuery = `
@@ -63,6 +79,11 @@ export class CompanyController {
       `
 
       await mysqlService.query(updateQuery, [url?.[0]?.url ?? ''])
+
+      // Delete old image after successful update
+      if (currentImgUrl) {
+        deleteOldImage(currentImgUrl)
+      }
 
       return res.status(200).json({
         success: true,
@@ -78,6 +99,11 @@ export class CompanyController {
 
   async updateCompanyBanner(req: Request, res: Response) {
     try {
+      // Get current banner URL before updating
+      const getCurrentBannerQuery = `SELECT BANNER FROM company_info WHERE id = 1`
+      const currentData = await mysqlService.query(getCurrentBannerQuery)
+      const currentBannerUrl = currentData[0]?.BANNER
+
       const url = await mediaService.handleUploadImage(req)
 
       const updateQuery = `
@@ -87,6 +113,11 @@ export class CompanyController {
       `
 
       await mysqlService.query(updateQuery, [url?.[0]?.url ?? ''])
+
+      // Delete old image after successful update
+      if (currentBannerUrl) {
+        deleteOldImage(currentBannerUrl)
+      }
 
       return res.status(200).json({
         success: true,
