@@ -1,5 +1,4 @@
 import { RefreshToken, RefreshTokenType } from '~/models/schemas/RefershToken.schema'
-import { instanceDatabase } from './database.service'
 import { verifyToken } from '~/utils/jwt'
 import { TokenPayload } from '~/models/schemas/requests/User.request'
 import { envConfig } from '~/constants/config'

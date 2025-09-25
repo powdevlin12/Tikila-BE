@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
 import { ParamSchema, checkSchema } from 'express-validator'
 import { JsonWebTokenError } from 'jsonwebtoken'
-import { ObjectId } from 'mongodb'
 import { UserVerifyStatus } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGE } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
-import { instanceDatabase } from '~/services/database.service'
 import userService from '~/services/user.service'
 import { hashPassword } from '~/utils/cryto'
 import { verifyToken } from '~/utils/jwt'
@@ -228,10 +226,12 @@ export const refreshTokenValidator = checkSchema(
             }
             const [decoded_refresh_token, refresh_token] = await Promise.all([
               verifyToken({ token: value, privateKey: envConfig.secretRefreshToken as string }),
-              instanceDatabase().refreshTokens.findOne({ token: value })
+              mysqlService.query('SELECT * FROM refresh_tokens WHERE token = ? LIMIT 1', [value])
             ])
 
-            if (!refresh_token) {
+            const foundToken = refresh_token.length > 0 ? refresh_token[0] : null
+
+            if (!foundToken) {
               throw new ErrorWithStatus({
                 message: USER_MESSAGE.USED_REFRESH_TOKEN_OR_NOT_EXIST,
                 status: HTTP_STATUS.UNAUTHORIZED
@@ -294,7 +294,8 @@ export const forgotPasswordValidate = checkSchema(
       isEmail: { errorMessage: USER_MESSAGE.EMAIL_IS_NOT_VALID },
       custom: {
         options: async (value, { req }) => {
-          const user = await instanceDatabase().users.findOne({ email: value })
+          const users = await mysqlService.query('SELECT * FROM users WHERE email = ? LIMIT 1', [value])
+          const user = users.length > 0 ? users[0] : null
 
           if (!user) {
             throw new ErrorWithStatus({ message: USER_MESSAGE.USER_NOT_FOUND, status: HTTP_STATUS.NOT_FOUND })
@@ -366,7 +367,8 @@ export const updateMeValidator = checkSchema(
             throw new Error(USER_MESSAGE.USER_NAME_IS_NOT_VALID)
           }
 
-          const user = await instanceDatabase().users.findOne({ username: value as string })
+          const users = await mysqlService.query('SELECT * FROM users WHERE username = ? LIMIT 1', [value])
+          const user = users.length > 0 ? users[0] : null
 
           if (user) {
             throw Error(USER_MESSAGE.USERNAME_IS_EXIST)
@@ -380,60 +382,36 @@ export const updateMeValidator = checkSchema(
   ['body']
 )
 
-export const followValidator = checkSchema({
-  followed_user_id: {
-    notEmpty: { errorMessage: USER_MESSAGE.FOLLOWED_USER_ID_NOT_EMPTY },
-    isString: { errorMessage: USER_MESSAGE.FOLLOW_USER_ID_MUST_BE_STRING },
-    custom: {
-      options: async (value: string, { req }) => {
-        if (!ObjectId.isValid(new ObjectId(value))) {
-          throw new ErrorWithStatus({
-            message: USER_MESSAGE.FOLLOWED_USER_ID_IS_NOT_VALID,
-            status: HTTP_STATUS.NOT_FOUND
-          })
-        }
+// Follow functionality disabled for MySQL version
+// export const followValidator = checkSchema({
+//   followed_user_id: {
+//     notEmpty: { errorMessage: USER_MESSAGE.FOLLOWED_USER_ID_NOT_EMPTY },
+//     isString: { errorMessage: USER_MESSAGE.FOLLOW_USER_ID_MUST_BE_STRING },
+//     custom: {
+//       options: async (value: string, { req }) => {
+//         // Follow functionality not available in MySQL version
+//         return true
+//       }
+//     }
+//   }
+// })
 
-        const follower = await instanceDatabase().followers.findOne({ followed_user_id: new ObjectId(value) })
-
-        if (follower === null) {
-          return true
-        }
-        throw new ErrorWithStatus({ message: USER_MESSAGE.USER_FOLLOWED_BEFORE, status: HTTP_STATUS.NOT_FOUND })
-      }
-    }
-  }
-})
-
-export const unfollowValidator = checkSchema(
-  {
-    followed_user_id: {
-      notEmpty: { errorMessage: USER_MESSAGE.FOLLOWED_USER_ID_NOT_EMPTY },
-      isString: { errorMessage: USER_MESSAGE.FOLLOW_USER_ID_MUST_BE_STRING },
-      custom: {
-        options: async (value: string, { req }) => {
-          const { user_id } = (req as Request).decoded_authorization as TokenPayload
-          if (!ObjectId.isValid(new ObjectId(value))) {
-            throw new ErrorWithStatus({
-              message: USER_MESSAGE.FOLLOWED_USER_ID_IS_NOT_VALID,
-              status: HTTP_STATUS.NOT_FOUND
-            })
-          }
-
-          const follower = await instanceDatabase().followers.findOne({
-            followed_user_id: new ObjectId(value),
-            user_id: new ObjectId(user_id)
-          })
-
-          if (follower === null) {
-            throw new ErrorWithStatus({ message: USER_MESSAGE.NOT_DATA_FOLLOW, status: HTTP_STATUS.NOT_FOUND })
-          }
-          return true
-        }
-      }
-    }
-  },
-  ['params']
-)
+// Unfollow functionality disabled for MySQL version
+// export const unfollowValidator = checkSchema(
+//   {
+//     followed_user_id: {
+//       notEmpty: { errorMessage: USER_MESSAGE.FOLLOWED_USER_ID_NOT_EMPTY },
+//       isString: { errorMessage: USER_MESSAGE.FOLLOW_USER_ID_MUST_BE_STRING },
+//       custom: {
+//         options: async (value: string, { req }) => {
+//           // Unfollow functionality not available in MySQL version
+//           return true
+//         }
+//       }
+//     }
+//   },
+//   ['params']
+// )
 
 export const changePasswordValidator = checkSchema({
   old_password: {
@@ -441,7 +419,8 @@ export const changePasswordValidator = checkSchema({
     custom: {
       options: async (value, { req }) => {
         const { user_id } = (req as Request).decoded_authorization as TokenPayload
-        const user = await instanceDatabase().users.findOne({ _id: new ObjectId(user_id) })
+        const users = await mysqlService.query('SELECT * FROM users WHERE id = ? LIMIT 1', [user_id])
+        const user = users.length > 0 ? users[0] : null
 
         if (user?.password !== hashPassword(value)) {
           throw new ErrorWithStatus({ status: HTTP_STATUS.NOT_FOUND, message: USER_MESSAGE.PASSWORD_IS_NOT_EXACTLY })

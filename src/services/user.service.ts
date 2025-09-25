@@ -1,12 +1,10 @@
 import axios from 'axios'
 import { config } from 'dotenv'
-import { ObjectId } from 'mongodb'
 import { envConfig } from '~/constants/config'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGE } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
-import Follower from '~/models/schemas/Follower.schema'
 import {
   FollowReqBody,
   RegisterRequestBody,
@@ -18,7 +16,6 @@ import { ISignToken } from '~/types/users/signToken'
 import { IRefreshTokenParameter } from '~/types/users/userServiceParameter'
 import { hashPassword } from '~/utils/cryto'
 import { signToken } from '~/utils/jwt'
-import { instanceDatabase } from './database.service'
 import refreshTokenService from './refreshToken.service'
 import mysqlService from './mysql.service'
 import { generateId } from '~/utils/gererator'
@@ -136,7 +133,7 @@ class UserService {
   // }
 
   async logout(refreshToken: string) {
-    const result = await instanceDatabase().refreshTokens.deleteOne({ token: refreshToken })
+    const result = await mysqlService.query('DELETE FROM refresh_tokens WHERE token = ?', [refreshToken])
     console.log('🚀 ~ file: user.service.ts:82 ~ UserService ~ result ~ result:', result)
     return { message: USER_MESSAGE.LOGOUT_SUCCESSFULLY }
   }
@@ -167,29 +164,31 @@ class UserService {
       verify: UserVerifyStatus.Unverified
     })
 
-    await instanceDatabase().users.updateOne({ _id: new ObjectId(user_id) }, [
-      { $set: { email_verify_token: new_email_verify_token, updated_at: '$$NOW' } }
+    await mysqlService.query('UPDATE users SET email_verify_token = ?, updated_at = NOW() WHERE id = ?', [
+      new_email_verify_token,
+      user_id
     ])
 
     return { message: USER_MESSAGE.RESEND_EMAIL_SUCCESS }
   }
 
-  async forgotPasswordToken(user_id: ObjectId) {
+  async forgotPasswordToken(user_id: string) {
     const forgot_password_token = await this.signForgotPasswordToken({
       user_id: user_id.toString(),
       verify: UserVerifyStatus.Verified
     })
-    await instanceDatabase().users.updateOne({ _id: user_id }, [
-      { $set: { forgot_password_token, updated_at: '$$NOW' } }
+    await mysqlService.query('UPDATE users SET forgot_password_token = ?, updated_at = NOW() WHERE id = ?', [
+      forgot_password_token,
+      user_id
     ])
 
     return { message: USER_MESSAGE.CHECK_EMAIL_TO_RESET_PASSWORD }
   }
 
   async resetPassword(user_id: string, password: string) {
-    await instanceDatabase().users.updateOne(
-      { _id: new ObjectId(user_id) },
-      { $set: { forgot_password_token: '', password: hashPassword(password) }, $currentDate: { updated_at: true } }
+    await mysqlService.query(
+      'UPDATE users SET forgot_password_token = "", password = ?, updated_at = NOW() WHERE id = ?',
+      [hashPassword(password), user_id]
     )
 
     return { message: USER_MESSAGE.RESET_PASSWORD_SUCCESS }
@@ -209,33 +208,36 @@ class UserService {
 
   async updateMe(user_id: string, payload: UpdateMeReqBody) {
     const _payload = payload?.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload
-    const user = await instanceDatabase().users.findOneAndUpdate(
-      { _id: new ObjectId(user_id) },
-      { $set: { ...(_payload as UpdateMeReqBody & { date_of_birth?: Date }) }, $currentDate: { updated_at: true } },
-      { returnDocument: 'after', projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } }
-    )
 
-    return user
+    // Build dynamic query for updating only provided fields
+    const fields = Object.keys(_payload).filter((key) => _payload[key as keyof UpdateMeReqBody] !== undefined)
+    if (fields.length === 0) return this.getMe(user_id)
+
+    const setClause = fields.map((field) => `${field} = ?`).join(', ')
+    const values = fields.map((field) => _payload[field as keyof UpdateMeReqBody])
+    values.push(user_id)
+
+    await mysqlService.query(`UPDATE users SET ${setClause}, updated_at = NOW() WHERE id = ?`, values)
+
+    // Return updated user without sensitive fields
+    const updatedUser = await this.getMe(user_id)
+    const { password, email_verify_token, forgot_password_token, ...userWithoutSensitive } = updatedUser
+    return userWithoutSensitive
   }
 
-  async followUser({ followed_user_id, user_id }: FollowReqBody & { user_id: string }) {
-    await instanceDatabase().followers.insertOne(
-      new Follower({ user_id: new ObjectId(user_id), followed_user_id: new ObjectId(followed_user_id) })
-    )
-  }
+  // async followUser({ followed_user_id, user_id }: FollowReqBody & { user_id: string }) {
+  //   // Follow functionality not implemented for MySQL
+  // }
 
-  async unfollowUser({ followed_user_id, user_id }: UnfollowReqParams & { user_id: string }) {
-    await instanceDatabase().followers.deleteOne({
-      user_id: new ObjectId(user_id),
-      followed_user_id: new ObjectId(followed_user_id)
-    })
-  }
+  // async unfollowUser({ followed_user_id, user_id }: UnfollowReqParams & { user_id: string }) {
+  //   // Unfollow functionality not implemented for MySQL
+  // }
 
   async changePassword({ user_id, new_password }: { user_id: string; new_password: string }) {
-    await instanceDatabase().users.updateOne(
-      { _id: new ObjectId(user_id) },
-      { $set: { password: hashPassword(new_password) }, $currentDate: { updated_at: true } }
-    )
+    await mysqlService.query('UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?', [
+      hashPassword(new_password),
+      user_id
+    ])
 
     return { message: USER_MESSAGE.CHANGE_PASSWORD_SUCCESSFULLY }
   }

@@ -1,7 +1,6 @@
 import { config } from 'dotenv'
 import { NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { ObjectId } from 'mongodb'
 import { envConfig } from '~/constants/config'
 import { UserVerifyStatus } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
@@ -21,14 +20,13 @@ import {
   VerifyForgotPasswordBody
 } from '~/models/schemas/requests/User.request'
 import User from '~/models/schemas/User.schema'
-import { instanceDatabase } from '~/services/database.service'
 import userService from '~/services/user.service'
 config()
 
 export const loginController = async (req: Request<ParamsDictionary, any, LoginRequestBody>, res: Response) => {
   const user = req.user as User
 
-  const token = await userService.login(user.id)
+  const token = await userService.login(user.id!)
   return res.status(200).json({
     message: USER_MESSAGE.LOGIN_SUCCESS,
     data: {

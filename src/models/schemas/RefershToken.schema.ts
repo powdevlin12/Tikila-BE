@@ -1,7 +1,5 @@
-import { ObjectId } from 'mongodb'
-
 export interface RefreshTokenType {
-  id?: string
+  id?: number
   token: string
   user_id: string
   createdAt?: Date
@@ -10,7 +8,7 @@ export interface RefreshTokenType {
 }
 
 export class RefreshToken {
-  id?: string
+  id?: number
   token: string
   user_id: string
   createdAt: Date
@@ -18,7 +16,7 @@ export class RefreshToken {
   iat: Date
 
   constructor(refreshToken: RefreshTokenType) {
-    this.id = refreshToken?.id ?? ''
+    this.id = refreshToken?.id
     this.token = refreshToken.token
     this.user_id = refreshToken.user_id
     this.createdAt = refreshToken.createdAt ?? new Date()

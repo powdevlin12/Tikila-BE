@@ -1,5 +1,5 @@
 interface UserTypes {
-  id: string
+  id?: string
   name: string
   email: string
   password: string
@@ -8,7 +8,7 @@ interface UserTypes {
 }
 
 export default class User {
-  id: string
+  id?: string
   name: string
   email: string
   password: string
@@ -17,11 +17,11 @@ export default class User {
 
   constructor(user: UserTypes) {
     const date = new Date()
-    ;((this.id = user.id ?? ''),
-      (this.name = user.name ?? ''),
-      (this.email = user.email ?? ''),
-      (this.password = user.password),
-      (this.created_at = user.created_at ?? date),
-      (this.updated_at = user.updated_at ?? date))
+    this.id = user.id
+    this.name = user.name ?? ''
+    this.email = user.email ?? ''
+    this.password = user.password
+    this.created_at = user.created_at ?? date
+    this.updated_at = user.updated_at ?? date
   }
 }
