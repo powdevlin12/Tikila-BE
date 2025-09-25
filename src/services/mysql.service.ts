@@ -1,5 +1,7 @@
 import mysql from 'mysql2/promise'
 import { envConfig } from '~/constants/config'
+import { hashPassword } from '~/utils/cryto'
+import { generateId } from '~/utils/gererator'
 
 export class MySQLService {
   private static instance: MySQLService
@@ -32,6 +34,7 @@ export class MySQLService {
       connection.release()
       console.log('✅ Connected to MySQL database successfully!')
       await this.createTables()
+      await this.createDefaultAdminUser()
     } catch (error) {
       console.error('❌ Error connecting to MySQL:', error)
       throw error
@@ -212,6 +215,42 @@ export class MySQLService {
       console.log('✅ Company info table updated successfully!')
     } catch (error) {
       console.error('❌ Error updating company_info table:', error)
+      throw error
+    }
+  }
+
+  public async createDefaultAdminUser(): Promise<void> {
+    try {
+      console.log('🔄 Checking for default admin user...')
+
+      // Check if admin user already exists
+      const checkAdminQuery = 'SELECT id FROM users WHERE email = ?'
+      const existingAdmin = await this.query(checkAdminQuery, ['admin@gmail.com'])
+
+      if (existingAdmin && existingAdmin.length > 0) {
+        console.log('✅ Admin user already exists, skipping creation.')
+        return
+      }
+
+      // Create default admin user
+      const adminId = generateId()
+      const adminName = 'Administrator'
+      const adminEmail = 'admin@gmail.com'
+      const adminPassword = '!Thudat68'
+      const hashedPassword = hashPassword(adminPassword)
+
+      const insertAdminQuery = `
+        INSERT INTO users (id, name, email, password, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `
+
+      await this.query(insertAdminQuery, [adminId, adminName, adminEmail, hashedPassword, new Date(), new Date()])
+
+      console.log('✅ Default admin user created successfully!')
+      console.log(`📧 Email: ${adminEmail}`)
+      console.log(`🔑 Password: ${adminPassword}`)
+    } catch (error) {
+      console.error('❌ Error creating default admin user:', error)
       throw error
     }
   }
