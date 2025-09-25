@@ -4,6 +4,10 @@ import jwt, { SignOptions } from 'jsonwebtoken'
 import { TokenPayload } from '~/models/schemas/requests/User.request'
 config()
 
+interface CustomSignOptions extends Omit<SignOptions, 'expiresIn'> {
+  expiresIn?: string | number
+}
+
 export const signToken = ({
   payload,
   privateKey,
@@ -13,7 +17,7 @@ export const signToken = ({
 }: {
   payload: string | Buffer | object
   privateKey: string | Buffer | KeyObject | { key: string | Buffer; passphrase: string }
-  options?: SignOptions
+  options?: CustomSignOptions
 }) =>
   new Promise<string>((resolve, reject) =>
     jwt.sign(payload, privateKey, options, (err, token) => {

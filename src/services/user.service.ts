@@ -26,7 +26,7 @@ class UserService {
     return signToken({
       payload: { user_id, token_type: TokenType.AccessToken, verify },
       privateKey: envConfig.secretAccessToken,
-      options: { algorithm: 'HS256', expiresIn: envConfig.accessTokenExpireIn as string }
+      options: { algorithm: 'HS256', expiresIn: envConfig.accessTokenExpireIn }
     })
   }
 
@@ -41,7 +41,7 @@ class UserService {
     return signToken({
       payload: { user_id, token_type: TokenType.RefreshToken, verify },
       privateKey: envConfig.secretRefreshToken,
-      options: { algorithm: 'HS256', expiresIn: envConfig.refreshTokenExpireIn as string }
+      options: { algorithm: 'HS256', expiresIn: envConfig.refreshTokenExpireIn }
     })
   }
 
@@ -49,7 +49,7 @@ class UserService {
     return signToken({
       payload: { user_id, token_type: TokenType.EmailVerifyToken, verify },
       privateKey: envConfig.secretEmailVerifyToken,
-      options: { algorithm: 'HS256', expiresIn: envConfig.emailVerifyTokenExprireIn as string }
+      options: { algorithm: 'HS256', expiresIn: envConfig.emailVerifyTokenExprireIn }
     })
   }
 
@@ -65,7 +65,7 @@ class UserService {
     return signToken({
       payload: { user_id, token_type: TokenType.ForgotPasswordToken, verify },
       privateKey: envConfig.secretForgotPasswordVerifyToken,
-      options: { algorithm: 'HS256', expiresIn: envConfig.forgotVerifyTokenExprireIn as string }
+      options: { algorithm: 'HS256', expiresIn: envConfig.forgotVerifyTokenExprireIn }
     })
   }
 
