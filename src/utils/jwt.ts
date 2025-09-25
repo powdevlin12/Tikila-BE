@@ -5,7 +5,7 @@ import { TokenPayload } from '~/models/schemas/requests/User.request'
 config()
 
 interface CustomSignOptions extends Omit<SignOptions, 'expiresIn'> {
-  expiresIn?: string | number
+  expiresIn?: any
 }
 
 export const signToken = ({
