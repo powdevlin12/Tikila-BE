@@ -2,4 +2,6 @@ import minimist from 'minimist'
 
 const option = minimist(process.argv)
 
-export const isProduction = Boolean(option.production)
+console.dir({ option: option.env === 'production' })
+
+export const isProduction = option.production === true || option.env === 'production'
