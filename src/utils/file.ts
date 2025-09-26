@@ -11,7 +11,7 @@ import {
 } from '~/constants/dir'
 
 export const initFolder = () => {
-  ;[UPLOAD_VIDEO_TEMP_FOLDER, UPLOAD_IMG_TEMP_FOLDER].map((dir) => {
+  ;[UPLOAD_VIDEO_TEMP_FOLDER, UPLOAD_IMG_TEMP_FOLDER, UPLOAD_IMG_FOLDER, UPLOAD_VIDEO_FOLDER].map((dir) => {
     if (!existsSync(dir)) {
       mkdirSync(dir, {
         recursive: true // create nested folders ex : uploads/images
