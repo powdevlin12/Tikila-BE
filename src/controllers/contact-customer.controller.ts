@@ -52,8 +52,10 @@ export class ContactCustomerController {
       const contact = await ContactCustomerService.getContactById(Number(id))
 
       if (!contact) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({
-          message: 'Contact not found'
+        return res.status(HTTP_STATUS.OK).json({
+          success: false,
+          message: 'Contact not found',
+          data: []
         })
       }
 
@@ -75,8 +77,10 @@ export class ContactCustomerController {
       const deleted = await ContactCustomerService.deleteContact(Number(id))
 
       if (!deleted) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({
-          message: 'Contact not found'
+        return res.status(HTTP_STATUS.OK).json({
+          success: false,
+          message: 'Contact not found',
+          data: []
         })
       }
 

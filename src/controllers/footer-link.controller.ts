@@ -28,8 +28,10 @@ export class FooterLinkController {
       const footerLink = await FooterLinkService.getFooterLinkById(Number(id))
 
       if (!footerLink) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({
-          message: 'Footer link not found'
+        return res.status(HTTP_STATUS.OK).json({
+          success: false,
+          message: 'Footer link not found',
+          data: []
         })
       }
 
@@ -98,8 +100,10 @@ export class FooterLinkController {
       const updated = await FooterLinkService.updateFooterLink(Number(id), updateData)
 
       if (!updated) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({
-          message: 'Footer link not found or no changes made'
+        return res.status(HTTP_STATUS.OK).json({
+          success: false,
+          message: 'Footer link not found or no changes made',
+          data: []
         })
       }
 
@@ -122,8 +126,10 @@ export class FooterLinkController {
       const deleted = await FooterLinkService.deleteFooterLink(Number(id))
 
       if (!deleted) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({
-          message: 'Footer link not found'
+        return res.status(HTTP_STATUS.OK).json({
+          success: false,
+          message: 'Footer link not found',
+          data: []
         })
       }
 

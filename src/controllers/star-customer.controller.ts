@@ -8,18 +8,20 @@ export class StarCustomerController {
 
       // Validate required fields
       if (!star || !name_customer) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Star rating and customer name are required'
+          message: 'Star rating and customer name are required',
+          data: []
         })
       }
 
       // Validate star rating
       const starRating = parseInt(star)
       if (isNaN(starRating) || starRating < 1 || starRating > 5) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Star rating must be a number between 1 and 5'
+          message: 'Star rating must be a number between 1 and 5',
+          data: []
         })
       }
 
@@ -36,9 +38,10 @@ export class StarCustomerController {
       })
     } catch (error) {
       if (error instanceof Error) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: error.message
+          message: error.message,
+          data: []
         })
       }
       next(error)
@@ -65,18 +68,20 @@ export class StarCustomerController {
       const starCustomerId = parseInt(id)
 
       if (isNaN(starCustomerId)) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Invalid star customer ID'
+          message: 'Invalid star customer ID',
+          data: []
         })
       }
 
       const starCustomer = await StarCustomerService.getStarCustomerById(starCustomerId)
 
       if (!starCustomer) {
-        return res.status(404).json({
+        return res.status(200).json({
           success: false,
-          message: 'Star customer review not found'
+          message: 'Star customer review not found',
+          data: []
         })
       }
 
@@ -96,18 +101,20 @@ export class StarCustomerController {
       const starCustomerId = parseInt(id)
 
       if (isNaN(starCustomerId)) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Invalid star customer ID'
+          message: 'Invalid star customer ID',
+          data: []
         })
       }
 
       const deleted = await StarCustomerService.deleteStarCustomer(starCustomerId)
 
       if (!deleted) {
-        return res.status(404).json({
+        return res.status(200).json({
           success: false,
-          message: 'Star customer review not found or already deleted'
+          message: 'Star customer review not found or already deleted',
+          data: []
         })
       }
 

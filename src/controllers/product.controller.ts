@@ -16,9 +16,10 @@ export class ProductController {
         if (result.images && result.images.length > 0) {
           image_url = result.images[0].url
         } else {
-          return res.status(400).json({
+          return res.status(200).json({
             success: false,
-            message: 'Image upload is required'
+            message: 'Image upload is required',
+            data: []
           })
         }
 
@@ -38,17 +39,19 @@ export class ProductController {
         console.log('Parsed fields:', { title, description, company_id, detail_info, image_url })
       } catch (uploadError: any) {
         console.error('Upload error:', uploadError)
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Failed to upload image: ' + uploadError.message
+          message: 'Failed to upload image: ' + uploadError.message,
+          data: []
         })
       }
 
       // Validate required fields
       if (!title || !description) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Title and description are required'
+          message: 'Title and description are required',
+          data: []
         })
       }
 
@@ -76,9 +79,10 @@ export class ProductController {
 
       // Validate required fields
       if (!title || !description || !image_url) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Title, description and image_url are required'
+          message: 'Title, description and image_url are required',
+          data: []
         })
       }
 
@@ -120,9 +124,10 @@ export class ProductController {
       const product = await ProductService.getProductById(parseInt(id))
 
       if (!product) {
-        return res.status(404).json({
+        return res.status(200).json({
           success: false,
-          message: 'Product not found'
+          message: 'Product not found',
+          data: []
         })
       }
 
@@ -209,9 +214,10 @@ export class ProductController {
       }
 
       if (!updated) {
-        return res.status(404).json({
+        return res.status(200).json({
           success: false,
-          message: 'Product not found or not updated'
+          message: 'Product not found or not updated',
+          data: []
         })
       }
 
@@ -231,9 +237,10 @@ export class ProductController {
       const deleted = await ProductService.deleteProduct(parseInt(id))
 
       if (!deleted) {
-        return res.status(404).json({
+        return res.status(200).json({
           success: false,
-          message: 'Product not found'
+          message: 'Product not found',
+          data: []
         })
       }
 

@@ -10,9 +10,10 @@ export class CompanyController {
       const companyInfo = await mysqlService.query('SELECT * FROM company_info LIMIT 1')
 
       if (companyInfo.length === 0) {
-        return res.status(404).json({
+        return res.status(200).json({
           success: false,
-          message: 'Không tìm thấy thông tin công ty'
+          message: 'Không tìm thấy thông tin công ty',
+          data: []
         })
       }
 
@@ -165,9 +166,10 @@ export class CompanyController {
 
       // Nếu không có field nào để update
       if (fieldsToUpdate.length === 0) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Không có dữ liệu để cập nhật'
+          message: 'Không có dữ liệu để cập nhật',
+          data: []
         })
       }
 
@@ -389,9 +391,10 @@ export class CompanyController {
       const { intro_text_detail } = req.body
 
       if (!intro_text_detail) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
-          message: 'Nội dung giới thiệu chi tiết không được để trống'
+          message: 'Nội dung giới thiệu chi tiết không được để trống',
+          data: []
         })
       }
 

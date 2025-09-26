@@ -37,7 +37,11 @@ export const serveImageController = async (req: Request, res: Response, next: Ne
   const { name } = req.params
   return res.sendFile(path.resolve(UPLOAD_IMG_FOLDER, name), (error) => {
     if (error) {
-      res.status((error as any).statusCode).send('Not Found')
+      res.status(HTTP_STATUS.OK).json({
+        success: false,
+        message: 'Image not found',
+        data: []
+      })
     }
   })
 }
@@ -46,7 +50,11 @@ export const serveVideoController = async (req: Request, res: Response, next: Ne
   const { name } = req.params
   return res.sendFile(path.resolve(UPLOAD_VIDEO_FOLDER, name), (error) => {
     if (error) {
-      res.status((error as any).statusCode).send('Not Found')
+      res.status(HTTP_STATUS.OK).json({
+        success: false,
+        message: 'Video not found',
+        data: []
+      })
     }
   })
 }
@@ -55,7 +63,11 @@ export const serveVideoStreamController = async (req: Request, res: Response, ne
   const range = req.headers.range
 
   if (!range) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).send('Request Range header')
+    return res.status(HTTP_STATUS.OK).json({
+      success: false,
+      message: 'Request Range header',
+      data: []
+    })
   }
 
   const { name } = req.params
