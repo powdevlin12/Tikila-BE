@@ -35,6 +35,7 @@ export class MySQLService {
       console.log('✅ Connected to MySQL database successfully!')
       await this.createTables()
       await this.createDefaultAdminUser()
+      await this.createDefaultCompanyInfo()
     } catch (error) {
       console.error('❌ Error connecting to MySQL:', error)
       throw error
@@ -251,6 +252,59 @@ export class MySQLService {
       console.log(`🔑 Password: ${adminPassword}`)
     } catch (error) {
       console.error('❌ Error creating default admin user:', error)
+      throw error
+    }
+  }
+
+  public async createDefaultCompanyInfo(): Promise<void> {
+    try {
+      console.log('🔄 Checking for default company info...')
+
+      // Check if company info already exists
+      const checkCompanyQuery = 'SELECT id FROM company_info WHERE id = ?'
+      const existingCompany = await this.query(checkCompanyQuery, [1])
+
+      if (existingCompany && existingCompany.length > 0) {
+        console.log('✅ Company info already exists, skipping creation.')
+        return
+      }
+
+      // Create default company info with id = 1 and empty fields
+      const insertCompanyQuery = `
+        INSERT INTO company_info (
+          id, name, logo_url, intro_text, address, tax_code, email, 
+          welcome_content, version_info, contact_id, img_intro, BANNER, 
+          COUNT_CUSTOMER, COUNT_CUSTOMER_SATISFY, COUNT_QUANLITY, intro_text_detail,
+          created_at, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `
+
+      await this.query(insertCompanyQuery, [
+        1,
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        null,
+        null,
+        '',
+        '',
+        0,
+        0,
+        100,
+        '',
+        new Date(),
+        new Date()
+      ])
+
+      console.log('✅ Default company info created successfully!')
+      console.log('📊 Company ID: 1')
+    } catch (error) {
+      console.error('❌ Error creating default company info:', error)
       throw error
     }
   }
