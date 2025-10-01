@@ -1,10 +1,11 @@
+import 'reflect-metadata'
 import express, { NextFunction, Request, Response } from 'express'
 import { UPLOAD_VIDEO_FOLDER } from './constants/dir'
 import { defaultErrorHandler } from './middlewares/error.middleware'
 import mediasRouter from './routes/medias.router'
 import staticsRouter from './routes/static.router'
 import userRouter from './routes/users.router'
-import mysqlService from './services/mysql.service'
+import { initializeDatabase } from './config/database'
 import { initFolder } from './utils/file'
 import { envConfig } from './constants/config'
 import helmet from 'helmet'
@@ -32,7 +33,7 @@ initFolder()
 app.use(express.json())
 app.use(helmet())
 app.use(cors())
-// app.use('/doc-api', swaggerUI.serve as any, swaggerUI.setup(swaggerDocument))
+app.use('/doc-api', swaggerUI.serve as any, swaggerUI.setup(swaggerDocument))
 
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }))
 
@@ -73,8 +74,8 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
     .json({ status: 'error', code: statusCode, message: error.message || 'Internal Server Error' })
 })
 
-// MySQL (new)
-mysqlService.connect().catch(console.error)
+// TypeORM Database Connection
+initializeDatabase().catch(console.error)
 // default handlers
 app.use(defaultErrorHandler)
 

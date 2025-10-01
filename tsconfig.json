@@ -7,6 +7,9 @@
     "esModuleInterop": true,
     "strict": true /* Enable all strict type-checking options. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "experimentalDecorators": true, // Enable decorators
+    "emitDecoratorMetadata": true, // Enable metadata for decorators
+    "strictPropertyInitialization": false, // Disable strict property initialization for entities
     "baseUrl": ".", // Đường dẫn base cho các import
     "paths": {
       "~/*": ["src/*"] // Đường dẫn tương đối cho các import (alias)

@@ -1,24 +1,21 @@
 import { Router } from 'express'
-import { ProductController } from '~/controllers/product.controller'
+import ProductControllerTypeORM from '~/controllers/product-typeorm.controller'
 
 const productRouter = Router()
 
 // Add a new product with image upload
-productRouter.post('/add', ProductController.addProduct)
-
-// Add a new product with existing image URL
-productRouter.post('/add-with-url', ProductController.addProductWithoutImage)
+productRouter.post('/add', ProductControllerTypeORM.addProduct)
 
 // Get all products
-productRouter.get('/', ProductController.getProducts)
+productRouter.get('/', ProductControllerTypeORM.getProducts)
 
 // Get product by ID
-productRouter.get('/:id', ProductController.getProductById)
+productRouter.get('/:id', ProductControllerTypeORM.getProductById)
 
 // Update product (supports both JSON with image_url and multipart with image upload)
-productRouter.put('/:id', ProductController.updateProduct)
+productRouter.put('/:id', ProductControllerTypeORM.updateProduct)
 
 // Delete product (soft delete)
-productRouter.delete('/:id', ProductController.deleteProduct)
+productRouter.delete('/:id', ProductControllerTypeORM.deleteProduct)
 
 export default productRouter
