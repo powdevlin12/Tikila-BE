@@ -7,7 +7,8 @@ import {
   Service,
   FooterLink,
   ContactCustomer,
-  StarCustomer
+  StarCustomer,
+  ServiceRegistration
 } from '~/entities'
 import { Repository } from 'typeorm'
 
@@ -23,6 +24,7 @@ export class TypeORMService {
   public footerLinkRepository: Repository<FooterLink>
   public contactCustomerRepository: Repository<ContactCustomer>
   public starCustomerRepository: Repository<StarCustomer>
+  public serviceRegistrationRepository: Repository<ServiceRegistration>
 
   constructor() {
     this.userRepository = AppDataSource.getRepository(User)
@@ -33,6 +35,7 @@ export class TypeORMService {
     this.footerLinkRepository = AppDataSource.getRepository(FooterLink)
     this.contactCustomerRepository = AppDataSource.getRepository(ContactCustomer)
     this.starCustomerRepository = AppDataSource.getRepository(StarCustomer)
+    this.serviceRegistrationRepository = AppDataSource.getRepository(ServiceRegistration)
   }
 
   public static getInstance(): TypeORMService {

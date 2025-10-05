@@ -21,6 +21,7 @@ import productRouter from './routes/product.route'
 import contactCustomerRouter from './routes/contact-customer.route'
 import footerLinkRoute from './routes/footer-link.route'
 import starCustomerRouter from './routes/star-customer.route'
+import serviceRegistrationRouter from './routes/service-registration.route'
 
 const file = fs.readFileSync(path.resolve('doc-api.yaml'), 'utf-8')
 const swaggerDocument = YAML.parse(file)
@@ -57,6 +58,7 @@ app.use('/products', productRouter)
 app.use('/contact-customer', contactCustomerRouter)
 app.use('/footer-links', footerLinkRoute)
 app.use('/star-customers', starCustomerRouter)
+app.use('/service-registrations', serviceRegistrationRouter)
 app.use('/statics/video', express.static(UPLOAD_VIDEO_FOLDER))
 
 // ** handle error middleware (tất cả các route đều chạy vô đây)

@@ -9,7 +9,8 @@ import {
   Service,
   FooterLink,
   ContactCustomer,
-  StarCustomer
+  StarCustomer,
+  ServiceRegistration
 } from '~/entities'
 import { generateId } from '~/utils/gererator'
 import { hashPassword } from '~/utils/cryto'
@@ -24,7 +25,17 @@ export const AppDataSource = new DataSource({
   synchronize: true, // Auto create tables (for development only)
   logging: false,
   charset: 'utf8mb4',
-  entities: [User, RefreshToken, CompanyInfo, ContactCompany, Service, FooterLink, ContactCustomer, StarCustomer],
+  entities: [
+    User,
+    RefreshToken,
+    CompanyInfo,
+    ContactCompany,
+    Service,
+    FooterLink,
+    ContactCustomer,
+    StarCustomer,
+    ServiceRegistration
+  ],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts']
 })
