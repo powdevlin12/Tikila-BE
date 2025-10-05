@@ -23,6 +23,7 @@ import footerLinkRoute from './routes/footer-link.route'
 import starCustomerRouter from './routes/star-customer.route'
 import serviceRegistrationRouter from './routes/service-registration.route'
 import dashboardRouter from './routes/dashboard.route'
+import footerColumnRoute from './routes/footer-column.route'
 
 const file = fs.readFileSync(path.resolve('doc-api.yaml'), 'utf-8')
 const swaggerDocument = YAML.parse(file)
@@ -58,6 +59,7 @@ app.use('/company', companyRouter)
 app.use('/products', productRouter)
 app.use('/contact-customer', contactCustomerRouter)
 app.use('/footer-links', footerLinkRoute)
+app.use('/footer-columns', footerColumnRoute)
 app.use('/star-customers', starCustomerRouter)
 app.use('/service-registrations', serviceRegistrationRouter)
 app.use('/dashboard', dashboardRouter)

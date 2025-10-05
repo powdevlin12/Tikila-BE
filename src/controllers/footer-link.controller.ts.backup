@@ -25,43 +25,40 @@ export class FooterLinkController {
   static async getFooterLinkById(req: Request, res: Response) {
     try {
       const { id } = req.params
-      const footerLink = await FooterLinkServiceTypeORM.getFooterLinkById(Number(id))
+      const footerLink = await FooterLinkService.getFooterLinkById(Number(id))
 
       if (!footerLink) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({
-          isSuccess: false,
-          message: 'Footer link not found'
+        return res.status(HTTP_STATUS.OK).json({
+          success: false,
+          message: 'Footer link not found',
+          data: []
         })
       }
 
       return res.status(HTTP_STATUS.OK).json({
-        isSuccess: true,
         message: 'Get footer link successfully',
         data: footerLink
       })
     } catch (error) {
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-        isSuccess: false,
         message: 'Internal server error',
         error: error
       })
     }
   }
 
-  // GET /footer-links/column/:footerColumnId - Lấy footer links theo column
+  // GET /footer-links/column/:columnPosition - Lấy footer links theo column
   static async getFooterLinksByColumn(req: Request, res: Response) {
     try {
-      const { footerColumnId } = req.params
-      const footerLinks = await FooterLinkServiceTypeORM.getFooterLinksByColumn(Number(footerColumnId))
+      const { columnPosition } = req.params
+      const footerLinks = await FooterLinkService.getFooterLinksByColumn(Number(columnPosition))
 
       return res.status(HTTP_STATUS.OK).json({
-        isSuccess: true,
         message: 'Get footer links by column successfully',
         data: footerLinks
       })
     } catch (error) {
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-        isSuccess: false,
         message: 'Internal server error',
         error: error
       })
@@ -71,19 +68,19 @@ export class FooterLinkController {
   // POST /footer-links - Tạo footer link mới
   static async createFooterLink(req: Request, res: Response) {
     try {
-      const { title, url, orderPosition, footerColumnId } = req.body
+      const { title, column_position, url, title_column } = req.body
 
-      const newFooterLink = await FooterLinkServiceTypeORM.createFooterLink({
+      const footerLinkId = await FooterLinkService.createFooterLink({
         title,
+        column_position,
         url,
-        orderPosition,
-        footerColumnId
+        title_column
       })
 
       return res.status(HTTP_STATUS.CREATED).json({
         isSuccess: true,
         message: 'Create footer link successfully',
-        data: newFooterLink
+        data: { id: footerLinkId }
       })
     } catch (error) {
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
@@ -100,23 +97,21 @@ export class FooterLinkController {
       const { id } = req.params
       const updateData = req.body
 
-      const updatedFooterLink = await FooterLinkServiceTypeORM.updateFooterLink(Number(id), updateData)
+      const updated = await FooterLinkService.updateFooterLink(Number(id), updateData)
 
-      if (!updatedFooterLink) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({
-          isSuccess: false,
-          message: 'Footer link not found'
+      if (!updated) {
+        return res.status(HTTP_STATUS.OK).json({
+          success: false,
+          message: 'Footer link not found or no changes made',
+          data: []
         })
       }
 
       return res.status(HTTP_STATUS.OK).json({
-        isSuccess: true,
-        message: 'Update footer link successfully',
-        data: updatedFooterLink
+        message: 'Update footer link successfully'
       })
     } catch (error) {
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-        isSuccess: false,
         message: 'Internal server error',
         error: error
       })
@@ -128,41 +123,40 @@ export class FooterLinkController {
     try {
       const { id } = req.params
 
-      const success = await FooterLinkServiceTypeORM.deleteFooterLink(Number(id))
+      const deleted = await FooterLinkService.deleteFooterLink(Number(id))
 
-      if (!success) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({
-          isSuccess: false,
-          message: 'Footer link not found'
+      if (!deleted) {
+        return res.status(HTTP_STATUS.OK).json({
+          success: false,
+          message: 'Footer link not found',
+          data: []
         })
       }
 
       return res.status(HTTP_STATUS.OK).json({
-        isSuccess: true,
         message: 'Delete footer link successfully'
       })
     } catch (error) {
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-        isSuccess: false,
         message: 'Internal server error',
         error: error
       })
     }
   }
 
-  // GET /footer-links/grouped - Lấy footer links được nhóm theo column
-  static async getFooterLinksGroupedByColumn(req: Request, res: Response) {
+  // DELETE /footer-links/column/:columnPosition - Xóa tất cả footer links theo column
+  static async deleteFooterLinksByColumn(req: Request, res: Response) {
     try {
-      const groupedFooterLinks = await FooterLinkServiceTypeORM.getFooterLinksGroupedByColumn()
+      const { columnPosition } = req.params
+
+      const deletedCount = await FooterLinkService.deleteFooterLinksByColumn(Number(columnPosition))
 
       return res.status(HTTP_STATUS.OK).json({
-        isSuccess: true,
-        message: 'Get grouped footer links successfully',
-        data: groupedFooterLinks
+        message: `Deleted ${deletedCount} footer links successfully`,
+        data: { deletedCount }
       })
     } catch (error) {
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-        isSuccess: false,
         message: 'Internal server error',
         error: error
       })

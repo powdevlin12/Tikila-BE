@@ -6,6 +6,7 @@ import {
   ContactCompany,
   Service,
   FooterLink,
+  FooterColumn,
   ContactCustomer,
   StarCustomer,
   ServiceRegistration
@@ -22,6 +23,7 @@ export class TypeORMService {
   public contactCompanyRepository: Repository<ContactCompany>
   public serviceRepository: Repository<Service>
   public footerLinkRepository: Repository<FooterLink>
+  public footerColumnRepository: Repository<FooterColumn>
   public contactCustomerRepository: Repository<ContactCustomer>
   public starCustomerRepository: Repository<StarCustomer>
   public serviceRegistrationRepository: Repository<ServiceRegistration>
@@ -33,6 +35,7 @@ export class TypeORMService {
     this.contactCompanyRepository = AppDataSource.getRepository(ContactCompany)
     this.serviceRepository = AppDataSource.getRepository(Service)
     this.footerLinkRepository = AppDataSource.getRepository(FooterLink)
+    this.footerColumnRepository = AppDataSource.getRepository(FooterColumn)
     this.contactCustomerRepository = AppDataSource.getRepository(ContactCustomer)
     this.starCustomerRepository = AppDataSource.getRepository(StarCustomer)
     this.serviceRegistrationRepository = AppDataSource.getRepository(ServiceRegistration)

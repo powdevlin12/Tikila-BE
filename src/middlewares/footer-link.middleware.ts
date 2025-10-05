@@ -27,13 +27,13 @@ export const validateCreateFooterLink = [
         errorMessage: 'Title must not exceed 255 characters'
       }
     },
-    column_position: {
+    footerColumnId: {
       notEmpty: {
-        errorMessage: 'Column position is required'
+        errorMessage: 'Footer column ID is required'
       },
       isInt: {
         options: { min: 1 },
-        errorMessage: 'Column position must be a positive integer'
+        errorMessage: 'Footer column ID must be a positive integer'
       }
     },
     url: {
@@ -48,16 +48,11 @@ export const validateCreateFooterLink = [
         errorMessage: 'URL must not exceed 255 characters'
       }
     },
-    title_column: {
-      notEmpty: {
-        errorMessage: 'Title column is required'
-      },
-      isString: {
-        errorMessage: 'Title column must be a string'
-      },
-      isLength: {
-        options: { max: 255 },
-        errorMessage: 'Title column must not exceed 255 characters'
+    orderPosition: {
+      optional: true,
+      isInt: {
+        options: { min: 0 },
+        errorMessage: 'Order position must be a non-negative integer'
       }
     }
   }),
@@ -76,11 +71,11 @@ export const validateUpdateFooterLink = [
         errorMessage: 'Title must not exceed 255 characters'
       }
     },
-    column_position: {
+    footerColumnId: {
       optional: true,
       isInt: {
         options: { min: 1 },
-        errorMessage: 'Column position must be a positive integer'
+        errorMessage: 'Footer column ID must be a positive integer'
       }
     },
     url: {
@@ -93,14 +88,11 @@ export const validateUpdateFooterLink = [
         errorMessage: 'URL must not exceed 255 characters'
       }
     },
-    title_column: {
+    orderPosition: {
       optional: true,
-      isString: {
-        errorMessage: 'Title column must be a string'
-      },
-      isLength: {
-        options: { max: 255 },
-        errorMessage: 'Title column must not exceed 255 characters'
+      isInt: {
+        options: { min: 0 },
+        errorMessage: 'Order position must be a non-negative integer'
       }
     }
   }),
@@ -120,13 +112,13 @@ export const validateFooterLinkId = [
   handleValidationErrors
 ]
 
-export const validateColumnPosition = [
+export const validateFooterColumnId = [
   checkSchema({
-    columnPosition: {
+    footerColumnId: {
       in: ['params'],
       isInt: {
         options: { min: 1 },
-        errorMessage: 'Column position must be a positive integer'
+        errorMessage: 'Footer column ID must be a positive integer'
       }
     }
   }),

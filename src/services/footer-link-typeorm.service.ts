@@ -3,73 +3,90 @@ import { FooterLink } from '~/entities'
 
 interface CreateFooterLinkBody {
   title: string
-  column_position: number
   url: string
-  title_column: string
+  orderPosition?: number
+  footerColumnId: number
+}
+
+interface UpdateFooterLinkBody {
+  title?: string
+  url?: string
+  orderPosition?: number
+  footerColumnId?: number
 }
 
 export class FooterLinkServiceTypeORM {
   static async createFooterLink(data: CreateFooterLinkBody) {
     const footerLink = new FooterLink()
     footerLink.title = data.title
-    footerLink.columnPosition = data.column_position
     footerLink.url = data.url
-    footerLink.titleColumn = data.title_column
+    footerLink.orderPosition = data.orderPosition || 0
+    footerLink.footerColumnId = data.footerColumnId
 
     return await typeormService.footerLinkRepository.save(footerLink)
   }
 
   static async getAllFooterLinks() {
     return await typeormService.footerLinkRepository.find({
-      order: { columnPosition: 'ASC', createdAt: 'DESC' }
+      relations: ['footerColumn'],
+      order: {
+        footerColumn: { position: 'ASC' },
+        orderPosition: 'ASC',
+        createdAt: 'DESC'
+      }
     })
   }
 
   static async getFooterLinkById(id: number) {
     return await typeormService.footerLinkRepository.findOne({
-      where: { id }
+      where: { id },
+      relations: ['footerColumn']
     })
   }
 
-  static async getFooterLinksByColumn(columnPosition: number) {
+  static async getFooterLinksByColumn(footerColumnId: number) {
     return await typeormService.footerLinkRepository.find({
-      where: { columnPosition },
-      order: { createdAt: 'DESC' }
+      where: { footerColumnId },
+      relations: ['footerColumn'],
+      order: { orderPosition: 'ASC', createdAt: 'DESC' }
     })
   }
 
-  static async updateFooterLink(id: number, updateData: Partial<CreateFooterLinkBody>) {
+  static async updateFooterLink(id: number, updateData: UpdateFooterLinkBody) {
     const updatePayload: any = {}
 
-    if (updateData.title) updatePayload.title = updateData.title
-    if (updateData.column_position !== undefined) updatePayload.columnPosition = updateData.column_position
-    if (updateData.url) updatePayload.url = updateData.url
-    if (updateData.title_column) updatePayload.titleColumn = updateData.title_column
+    if (updateData.title !== undefined) updatePayload.title = updateData.title
+    if (updateData.url !== undefined) updatePayload.url = updateData.url
+    if (updateData.orderPosition !== undefined) updatePayload.orderPosition = updateData.orderPosition
+    if (updateData.footerColumnId !== undefined) updatePayload.footerColumnId = updateData.footerColumnId
 
     await typeormService.footerLinkRepository.update(id, updatePayload)
     return await this.getFooterLinkById(id)
   }
 
   static async deleteFooterLink(id: number) {
-    await typeormService.footerLinkRepository.delete(id)
-    return { message: 'Footer link deleted successfully' }
+    const result = await typeormService.footerLinkRepository.delete(id)
+    return result.affected === 1
   }
 
   static async getFooterLinksGroupedByColumn() {
     const footerLinks = await this.getAllFooterLinks()
 
     const grouped = footerLinks.reduce((acc, link) => {
-      if (!acc[link.columnPosition]) {
-        acc[link.columnPosition] = {
-          columnPosition: link.columnPosition,
-          titleColumn: link.titleColumn,
+      const columnId = link.footerColumnId
+      if (!acc[columnId]) {
+        acc[columnId] = {
+          columnId: columnId,
+          columnTitle: link.footerColumn?.title || '',
+          columnPosition: link.footerColumn?.position || 0,
           links: []
         }
       }
-      acc[link.columnPosition].links.push({
+      acc[columnId].links.push({
         id: link.id,
         title: link.title,
         url: link.url,
+        orderPosition: link.orderPosition,
         createdAt: link.createdAt
       })
       return acc

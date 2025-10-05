@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm'
+import { FooterColumn } from './FooterColumn.entity'
 
 @Entity('footer_links')
 export class FooterLink {
@@ -8,14 +9,18 @@ export class FooterLink {
   @Column({ type: 'varchar', length: 255, nullable: true })
   title: string
 
-  @Column({ name: 'column_position', type: 'int', nullable: true })
-  columnPosition: number
-
   @Column({ type: 'varchar', length: 255, nullable: true })
   url: string
 
-  @Column({ name: 'title_column', type: 'varchar', length: 255, nullable: true })
-  titleColumn: string
+  @Column({ name: 'order_position', type: 'int', nullable: true, default: 0 })
+  orderPosition: number
+
+  @Column({ name: 'footer_column_id', type: 'int', nullable: true })
+  footerColumnId: number
+
+  @ManyToOne(() => FooterColumn, (footerColumn) => footerColumn.footerLinks)
+  @JoinColumn({ name: 'footer_column_id' })
+  footerColumn: FooterColumn
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date
