@@ -23,13 +23,6 @@ export const envConfig = {
   mysqlUsername: process.env.MYSQL_USERNAME as string,
   mysqlPassword: process.env.MYSQL_PASSWORD as string,
   mysqlDatabase: process.env.MYSQL_DATABASE as string,
-  // MongoDB Configuration (removed - now using MySQL)
-  // dbUsername: process.env.DB_USERNAME as string,
-  // dbPassword: process.env.DB_PASSWORD as string,
-  // dbName: process.env.DB_DATABASE as string,
-  // collectionUsers: process.env.DB_COLLECTION_USERS as string,
-  // collectionRefreshTokens: process.env.DB_COLLECTION_REFRESH_TOKENS as string,
-  // collectionFollower: process.env.DB_COLLECTION_FOLLOWER as string,
   portServer: process.env.PORT_SERVER as string,
   secretAccessToken: process.env.JWT_SECRET_ACCESS_TOKEN as string,
   secretRefreshToken: process.env.JWT_SECRET_REFRESH_TOKEN as string,

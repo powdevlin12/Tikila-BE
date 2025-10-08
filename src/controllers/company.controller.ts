@@ -2,25 +2,18 @@ import { Request, Response } from 'express'
 import mediaService from '~/services/media.service'
 import mysqlService from '~/services/mysql.service'
 import { deleteOldImage } from '~/utils/file'
+import CompanyServiceTypeORM from '~/services/company-typeorm.service'
 
 export class CompanyController {
   // Lấy thông tin công ty
   async getCompanyInfo(req: Request, res: Response) {
     try {
-      const companyInfo = await mysqlService.query('SELECT * FROM company_info LIMIT 1')
-
-      if (companyInfo.length === 0) {
-        return res.status(200).json({
-          success: false,
-          message: 'Không tìm thấy thông tin công ty',
-          data: []
-        })
-      }
+      const companyInfo = await CompanyServiceTypeORM.getCompanyInfo()
 
       return res.status(200).json({
         success: true,
         message: 'Lấy thông tin công ty thành công',
-        data: companyInfo[0]
+        data: companyInfo
       })
     } catch (error) {
       return res.status(500).json({
@@ -33,19 +26,14 @@ export class CompanyController {
   async updateCompanyLogo(req: Request, res: Response) {
     try {
       // Get current logo URL before updating
-      const getCurrentLogoQuery = `SELECT logo_url FROM company_info WHERE id = 1`
-      const currentData = await mysqlService.query(getCurrentLogoQuery)
-      const currentLogoUrl = currentData[0]?.logo_url
+      const companyInfo = await CompanyServiceTypeORM.getCompanyInfo()
+      const currentLogoUrl = companyInfo.logoUrl
 
       const url = await mediaService.handleUploadImage(req)
 
-      const updateQuery = `
-        UPDATE company_info 
-        SET logo_url = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = 1
-      `
-
-      await mysqlService.query(updateQuery, [url?.[0]?.url ?? ''])
+      await CompanyServiceTypeORM.updateCompanyInfo({
+        logo_url: url?.[0]?.url ?? ''
+      })
 
       // Delete old image after successful update
       if (currentLogoUrl) {
@@ -67,19 +55,14 @@ export class CompanyController {
   async updateCompanyImgIntro(req: Request, res: Response) {
     try {
       // Get current img_intro URL before updating
-      const getCurrentImgQuery = `SELECT img_intro FROM company_info WHERE id = 1`
-      const currentData = await mysqlService.query(getCurrentImgQuery)
-      const currentImgUrl = currentData[0]?.img_intro
+      const companyInfo = await CompanyServiceTypeORM.getCompanyInfo()
+      const currentImgUrl = companyInfo.imgIntro
 
       const url = await mediaService.handleUploadImage(req)
 
-      const updateQuery = `
-        UPDATE company_info 
-        SET img_intro = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = 1
-      `
-
-      await mysqlService.query(updateQuery, [url?.[0]?.url ?? ''])
+      await CompanyServiceTypeORM.updateCompanyInfo({
+        img_intro: url?.[0]?.url ?? ''
+      })
 
       // Delete old image after successful update
       if (currentImgUrl) {
@@ -101,19 +84,14 @@ export class CompanyController {
   async updateCompanyBanner(req: Request, res: Response) {
     try {
       // Get current banner URL before updating
-      const getCurrentBannerQuery = `SELECT BANNER FROM company_info WHERE id = 1`
-      const currentData = await mysqlService.query(getCurrentBannerQuery)
-      const currentBannerUrl = currentData[0]?.BANNER
+      const companyInfo = await CompanyServiceTypeORM.getCompanyInfo()
+      const currentBannerUrl = companyInfo.banner
 
       const url = await mediaService.handleUploadImage(req)
 
-      const updateQuery = `
-        UPDATE company_info 
-        SET BANNER = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = 1
-      `
-
-      await mysqlService.query(updateQuery, [url?.[0]?.url ?? ''])
+      await CompanyServiceTypeORM.updateCompanyInfo({
+        banner: url?.[0]?.url ?? ''
+      })
 
       // Delete old image after successful update
       if (currentBannerUrl) {
@@ -137,35 +115,12 @@ export class CompanyController {
     try {
       const updateData = req.body
 
-      // Lọc ra những trường có dữ liệu (không undefined, null hoặc empty string)
-      const fieldsToUpdate: string[] = []
-      const values: any[] = []
+      // Kiểm tra xem có dữ liệu để cập nhật không
+      const hasDataToUpdate = Object.keys(updateData).some(
+        (key) => updateData[key] !== undefined && updateData[key] !== null
+      )
 
-      // Mapping các field với tên column trong database
-      const fieldMapping: { [key: string]: string } = {
-        name: 'name',
-        logo_url: 'logo_url',
-        intro_text: 'intro_text',
-        address: 'address',
-        tax_code: 'tax_code',
-        email: 'email',
-        welcome_content: 'welcome_content',
-        img_intro: 'img_intro',
-        COUNT_CUSTOMER: 'COUNT_CUSTOMER',
-        COUNT_CUSTOMER_SATISFY: 'COUNT_CUSTOMER_SATISFY',
-        COUNT_QUANLITY: 'COUNT_QUANLITY'
-      }
-
-      // Duyệt qua các field được gửi lên
-      Object.keys(updateData).forEach((key) => {
-        if (fieldMapping[key] && updateData[key] !== undefined && updateData[key] !== null) {
-          fieldsToUpdate.push(`${fieldMapping[key]} = ?`)
-          values.push(updateData[key])
-        }
-      })
-
-      // Nếu không có field nào để update
-      if (fieldsToUpdate.length === 0) {
+      if (!hasDataToUpdate) {
         return res.status(200).json({
           success: false,
           message: 'Không có dữ liệu để cập nhật',
@@ -173,16 +128,7 @@ export class CompanyController {
         })
       }
 
-      // Thêm updated_at vào cuối
-      fieldsToUpdate.push('updated_at = CURRENT_TIMESTAMP')
-
-      const updateQuery = `
-        UPDATE company_info 
-        SET ${fieldsToUpdate.join(', ')}
-        WHERE id = 1
-      `
-
-      await mysqlService.query(updateQuery, values)
+      await CompanyServiceTypeORM.updateCompanyInfo(updateData)
 
       return res.status(200).json({
         success: true,
@@ -370,12 +316,12 @@ export class CompanyController {
   // Lấy nội dung giới thiệu chi tiết
   async getIntroDetail(req: Request, res: Response) {
     try {
-      const introDetail = await mysqlService.query('SELECT intro_text_detail FROM company_info LIMIT 1')
+      const companyInfo = await CompanyServiceTypeORM.getCompanyInfo()
 
       return res.status(200).json({
         success: true,
         message: 'Lấy nội dung giới thiệu chi tiết thành công',
-        data: introDetail[0] || {}
+        data: { intro_text_detail: companyInfo.introTextDetail }
       })
     } catch (error) {
       return res.status(500).json({
@@ -398,13 +344,9 @@ export class CompanyController {
         })
       }
 
-      const updateQuery = `
-        UPDATE company_info 
-        SET intro_text_detail = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = 1
-      `
-
-      await mysqlService.query(updateQuery, [intro_text_detail])
+      await CompanyServiceTypeORM.updateCompanyInfo({
+        intro_text_detail
+      })
 
       return res.status(200).json({
         success: true,
