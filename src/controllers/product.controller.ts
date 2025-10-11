@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { ProductService } from '~/services/product.service'
+import { ProductServiceTypeORM } from '~/services/product-typeorm.service'
 import mediaService from '~/services/media.service'
 import { deleteOldImage } from '~/utils/file'
 
@@ -55,7 +55,7 @@ export class ProductController {
         })
       }
 
-      const productResult = await ProductService.addProduct({
+      const productResult = await ProductServiceTypeORM.addProduct({
         title,
         description,
         image_url,
@@ -86,7 +86,7 @@ export class ProductController {
         })
       }
 
-      const result = await ProductService.addProduct({
+      const result = await ProductServiceTypeORM.addProduct({
         title,
         description,
         image_url,
@@ -106,7 +106,7 @@ export class ProductController {
 
   static async getProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await ProductService.getProducts()
+      const products = await ProductServiceTypeORM.getProducts()
 
       return res.status(200).json({
         success: true,
@@ -121,7 +121,7 @@ export class ProductController {
   static async getProductById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params
-      const product = await ProductService.getProductById(parseInt(id))
+      const product = await ProductServiceTypeORM.getProductById(parseInt(id))
 
       if (!product) {
         return res.status(200).json({
@@ -146,7 +146,7 @@ export class ProductController {
       const { id } = req.params
 
       // Get current product data before updating (to get current image URL)
-      const currentProduct = await ProductService.getProductById(parseInt(id))
+      const currentProduct = await ProductServiceTypeORM.getProductById(parseInt(id))
       const currentImageUrl = currentProduct?.image_url
 
       // Try to parse as multipart first (if image is being uploaded)
@@ -200,7 +200,7 @@ export class ProductController {
         }
       }
 
-      const updated = await ProductService.updateProduct(parseInt(id), {
+      const updated = await ProductServiceTypeORM.updateProduct(parseInt(id), {
         title,
         description,
         image_url,
@@ -234,7 +234,7 @@ export class ProductController {
     try {
       const { id } = req.params
 
-      const deleted = await ProductService.deleteProduct(parseInt(id))
+      const deleted = await ProductServiceTypeORM.deleteProduct(parseInt(id))
 
       if (!deleted) {
         return res.status(200).json({

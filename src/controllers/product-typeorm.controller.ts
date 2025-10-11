@@ -34,8 +34,6 @@ export class ProductControllerTypeORM {
         detail_info = Array.isArray(result.fields.detail_info)
           ? result.fields.detail_info[0]
           : result.fields.detail_info
-
-        console.log('Parsed fields:', { title, description, company_id, detail_info, image_url })
       } catch (uploadError: any) {
         console.error('Upload error:', uploadError)
         return res.status(200).json({
@@ -158,47 +156,61 @@ export class ProductControllerTypeORM {
       }
 
       const updateData: any = {}
-      let newImageUrl = ''
 
-      try {
-        const result = await mediaService.handleUploadImageWithFields(req)
+      // Check if the request is multipart/form-data (file upload)
+      const isMultipart = req.headers['content-type']?.includes('multipart/form-data')
 
-        if (result.images && result.images.length > 0) {
-          newImageUrl = result.images[0].url
-          updateData.image_url = newImageUrl
+      if (isMultipart) {
+        try {
+          const result = await mediaService.handleUploadImageWithFieldsOptional(req)
 
-          // Delete old image if exists
-          if (existingProduct.imageUrl) {
-            await deleteOldImage(existingProduct.imageUrl)
+          // Only update image if new image is provided
+          if (result.images && result.images.length > 0) {
+            updateData.image_url = result.images[0].url
+
+            // Delete old image if exists
+            if (existingProduct.imageUrl) {
+              await deleteOldImage(existingProduct.imageUrl)
+            }
           }
-        }
 
-        // Extract fields from the form data
-        if (result.fields.title) {
-          updateData.title = Array.isArray(result.fields.title) ? result.fields.title[0] : result.fields.title
+          // Extract fields from the form data
+          if (result.fields.title) {
+            updateData.title = Array.isArray(result.fields.title) ? result.fields.title[0] : result.fields.title
+          }
+          if (result.fields.description) {
+            updateData.description = Array.isArray(result.fields.description)
+              ? result.fields.description[0]
+              : result.fields.description
+          }
+          if (result.fields.company_id) {
+            updateData.company_id = Array.isArray(result.fields.company_id)
+              ? parseInt(result.fields.company_id[0])
+              : parseInt(result.fields.company_id)
+          }
+          if (result.fields.detail_info) {
+            updateData.detail_info = Array.isArray(result.fields.detail_info)
+              ? result.fields.detail_info[0]
+              : result.fields.detail_info
+          }
+        } catch (uploadError: any) {
+          console.error('Upload error:', uploadError)
+          return res.status(200).json({
+            success: false,
+            message: 'Failed to process update: ' + uploadError.message,
+            data: []
+          })
         }
-        if (result.fields.description) {
-          updateData.description = Array.isArray(result.fields.description)
-            ? result.fields.description[0]
-            : result.fields.description
-        }
-        if (result.fields.company_id) {
-          updateData.company_id = Array.isArray(result.fields.company_id)
-            ? parseInt(result.fields.company_id[0])
-            : parseInt(result.fields.company_id)
-        }
-        if (result.fields.detail_info) {
-          updateData.detail_info = Array.isArray(result.fields.detail_info)
-            ? result.fields.detail_info[0]
-            : result.fields.detail_info
-        }
-      } catch (uploadError: any) {
-        console.error('Upload error:', uploadError)
-        return res.status(200).json({
-          success: false,
-          message: 'Failed to process update: ' + uploadError.message,
-          data: []
-        })
+      } else {
+        console.log('Processing JSON request (no file upload)')
+        // Handle JSON request (no file upload)
+        const { title, description, company_id, detail_info, image_url } = req.body
+
+        if (title) updateData.title = title
+        if (description) updateData.description = description
+        if (company_id !== undefined) updateData.company_id = company_id
+        if (detail_info) updateData.detail_info = detail_info
+        if (image_url) updateData.image_url = image_url
       }
 
       const updatedProduct = await ProductServiceTypeORM.updateProduct(parseInt(id), updateData)

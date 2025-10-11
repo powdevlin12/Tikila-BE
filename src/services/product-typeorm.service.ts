@@ -44,7 +44,7 @@ export class ProductServiceTypeORM {
     if (updateData.description) updatePayload.description = updateData.description
     if (updateData.image_url) updatePayload.imageUrl = updateData.image_url
     if (updateData.company_id !== undefined) updatePayload.companyId = updateData.company_id
-    if (updateData.detail_info) updatePayload.detailInfo = updateData.detail_info
+    if (updateData.detail_info !== undefined) updatePayload.detailInfo = updateData.detail_info
 
     await typeormService.serviceRepository.update(id, updatePayload)
     return await this.getProductById(id)

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { StarCustomerService } from '~/services/star-customer.service'
+import { StarCustomerServiceTypeORM } from '~/services/star-customer-typeorm.service'
 
 export class StarCustomerController {
   static async addStarCustomer(req: Request, res: Response, next: NextFunction) {
@@ -25,7 +25,7 @@ export class StarCustomerController {
         })
       }
 
-      const result = await StarCustomerService.addStarCustomer({
+      const result = await StarCustomerServiceTypeORM.createStarCustomer({
         star: starRating,
         name_customer: name_customer.trim(),
         content: content || ''
@@ -50,7 +50,7 @@ export class StarCustomerController {
 
   static async getStarCustomers(req: Request, res: Response, next: NextFunction) {
     try {
-      const starCustomers = await StarCustomerService.getStarCustomers()
+      const starCustomers = await StarCustomerServiceTypeORM.getStarCustomers()
 
       return res.status(200).json({
         success: true,
@@ -75,7 +75,7 @@ export class StarCustomerController {
         })
       }
 
-      const starCustomer = await StarCustomerService.getStarCustomerById(starCustomerId)
+      const starCustomer = await StarCustomerServiceTypeORM.getStarCustomerById(starCustomerId)
 
       if (!starCustomer) {
         return res.status(200).json({
@@ -108,7 +108,7 @@ export class StarCustomerController {
         })
       }
 
-      const deleted = await StarCustomerService.deleteStarCustomer(starCustomerId)
+      const deleted = await StarCustomerServiceTypeORM.deleteStarCustomer(starCustomerId)
 
       if (!deleted) {
         return res.status(200).json({
@@ -129,7 +129,7 @@ export class StarCustomerController {
 
   static async getStarCustomerStats(req: Request, res: Response, next: NextFunction) {
     try {
-      const stats = await StarCustomerService.getStarCustomerStats()
+      const stats = await StarCustomerServiceTypeORM.getAverageRating()
 
       return res.status(200).json({
         success: true,
