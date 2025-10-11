@@ -36,7 +36,7 @@ initFolder()
 app.use(express.json())
 app.use(helmet())
 app.use(cors())
-app.use('/doc-api', swaggerUI.serve as any, swaggerUI.setup(swaggerDocument))
+// app.use('/doc-api', swaggerUI.serve as any, swaggerUI.setup(swaggerDocument))
 
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }))
 
