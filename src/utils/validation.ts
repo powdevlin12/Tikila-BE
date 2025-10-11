@@ -23,9 +23,9 @@ export const validate = (validation: ValidationChain[]) => {
 
       if (msg instanceof ErrorWithStatus && msg.status !== HTTP_STATUS.UNPROCESSABLE_ENTITY) {
         return next(msg)
+      } else {
+        return next(new ErrorWithStatus({ message: msg.toString(), status: HTTP_STATUS.UNPROCESSABLE_ENTITY }))
       }
-
-      entityError.errors[key] = errorsObject[key]
     }
 
     next(entityError)

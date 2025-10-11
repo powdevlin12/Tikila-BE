@@ -1,23 +1,23 @@
 import { Request, Response, NextFunction } from 'express'
-import { body, param, validationResult } from 'express-validator'
+import { body, checkSchema, param, validationResult } from 'express-validator'
 import HTTP_STATUS from '~/constants/httpStatus'
 
 export const validateContactCustomer = [
   body('full_name')
     .notEmpty()
-    .withMessage('Full name is required')
+    .withMessage('Vui lòng nhập họ và tên')
     .isLength({ min: 2, max: 100 })
-    .withMessage('Full name must be between 2 and 100 characters'),
+    .withMessage('Họ và tên phải từ 2 đến 100 ký tự'),
   body('phone_customer')
     .notEmpty()
-    .withMessage('Phone number is required')
+    .withMessage('Vui lòng nhập số điện thoại')
     .isMobilePhone('vi-VN')
-    .withMessage('Invalid Vietnamese phone number format'),
+    .withMessage('Số điện thoại không hợp lệ'),
   body('message')
     .notEmpty()
-    .withMessage('Message is required')
+    .withMessage('Vui lòng nhập nội dung tin nhắn')
     .isLength({ max: 500 })
-    .withMessage('Message must not exceed 500 characters'),
+    .withMessage('Nội dung tin nhắn không được vượt quá 500 ký tự'),
   body('service_id').optional().isInt({ min: 1 }).withMessage('Service ID must be a positive integer'),
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req)
@@ -30,6 +30,46 @@ export const validateContactCustomer = [
     next()
   }
 ]
+
+export const contactCustomerValidator = checkSchema(
+  {
+    full_name: {
+      notEmpty: {
+        errorMessage: 'Vui lòng nhập họ và tên'
+      },
+      isLength: {
+        options: { min: 2, max: 100 },
+        errorMessage: 'Họ và tên phải từ 2 đến 100 ký tự'
+      }
+    },
+    phone_customer: {
+      notEmpty: {
+        errorMessage: 'Vui lòng nhập số điện thoại'
+      },
+      isMobilePhone: {
+        options: 'vi-VN',
+        errorMessage: 'Số điện thoại không hợp lệ'
+      }
+    },
+    message: {
+      notEmpty: {
+        errorMessage: 'Vui lòng nhập nội dung tin nhắn'
+      },
+      isLength: {
+        options: { max: 500 },
+        errorMessage: 'Nội dung tin nhắn không được vượt quá 500 ký tự'
+      }
+    },
+    service_id: {
+      optional: true,
+      isInt: {
+        options: { min: 1 },
+        errorMessage: 'Vui lòng nhập chọn dịch vụ'
+      }
+    }
+  },
+  ['body']
+)
 
 export const validateContactId = [
   param('id').isInt({ min: 1 }).withMessage('Contact ID must be a positive integer'),
