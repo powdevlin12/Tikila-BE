@@ -147,7 +147,7 @@ export class ProductController {
 
       // Get current product data before updating (to get current image URL)
       const currentProduct = await ProductServiceTypeORM.getProductById(parseInt(id))
-      const currentImageUrl = currentProduct?.image_url
+      const currentImageUrl = currentProduct?.imageUrl
 
       // Try to parse as multipart first (if image is being uploaded)
       let title, description, image_url, company_id, detail_info
