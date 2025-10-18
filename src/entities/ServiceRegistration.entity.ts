@@ -29,10 +29,10 @@ export class ServiceRegistration {
   @Column({ type: 'varchar', length: 20, default: 'active', comment: 'active, expired, cancelled' })
   status: string
 
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0, comment: 'Amount paid by customer' })
+  @Column({ type: 'decimal', precision: 15, scale: 0, default: 0, comment: 'Amount paid by customer' })
   amount_paid: number
 
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0, comment: 'Amount due from customer' })
+  @Column({ type: 'decimal', precision: 15, scale: 0, default: 0, comment: 'Amount due from customer' })
   amount_due: number
 
   @CreateDateColumn({ name: 'created_at' })
