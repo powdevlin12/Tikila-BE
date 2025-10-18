@@ -10,6 +10,7 @@ interface CreateServiceRegistrationBody {
   duration_months: number
   amount_paid?: number
   amount_due?: number
+  registration_date: Date
 }
 
 interface UpdateServiceRegistrationBody {
@@ -116,9 +117,10 @@ export class ServiceRegistrationServiceTypeORM {
     registration.status = 'active'
     registration.amount_paid = data.amount_paid || 0
     registration.amount_due = data.amount_due || 0
+    registration.registrationDate = new Date(data.registration_date)
 
     // Calculate end date based on duration
-    const endDate = new Date()
+    const endDate = new Date(data.registration_date)
     endDate.setMonth(endDate.getMonth() + data.duration_months)
     registration.end_date = endDate
 
@@ -153,9 +155,9 @@ export class ServiceRegistrationServiceTypeORM {
 
   // Delete service registration (soft delete by changing status)
   static async deleteServiceRegistration(id: string) {
-    const registration = await this.getServiceRegistrationById(id)
-    registration.status = 'cancelled'
-    return await typeormService.serviceRegistrationRepository.save(registration)
+    return await typeormService.serviceRegistrationRepository.delete({
+      id
+    })
   }
 
   // Hard delete service registration
