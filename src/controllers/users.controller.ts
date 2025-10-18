@@ -31,8 +31,7 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginR
     message: USER_MESSAGE.LOGIN_SUCCESS,
     data: {
       access_token: token.accessToken,
-      refresh_token: token.refreshToken,
-      user: user
+      refresh_token: token.refreshToken
     }
   })
 }

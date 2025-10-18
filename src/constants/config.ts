@@ -17,6 +17,9 @@ config({
 
 export const envConfig = {
   host: process.env.HOST as string,
+  // ** default admin account
+  adminUserDefault: process.env.ADMIN_USER_DEFAULT as string,
+  adminPasswordDefault: process.env.ADMIN_PASSWORD_DEFAULT as string,
   // MySQL Configuration
   mysqlHost: process.env.MYSQL_HOST as string,
   mysqlPort: parseInt(process.env.MYSQL_PORT as string) || 3306,

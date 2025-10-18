@@ -66,15 +66,15 @@ const createDefaultData = async (): Promise<void> => {
 
     // Check if admin user exists
     const existingAdmin = await userRepository.findOne({
-      where: { email: 'admin@gmail.com' }
+      where: { email: envConfig.adminUserDefault }
     })
 
     if (!existingAdmin) {
       const adminUser = new User()
       adminUser.id = generateId()
       adminUser.name = 'Administrator'
-      adminUser.email = 'admin@gmail.com'
-      adminUser.password = hashPassword('!Thudat68')
+      adminUser.email = envConfig.adminUserDefault
+      adminUser.password = hashPassword(envConfig.adminPasswordDefault)
 
       await userRepository.save(adminUser)
       console.log('✅ Default admin user created successfully!')

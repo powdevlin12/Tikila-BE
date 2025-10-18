@@ -1,7 +1,6 @@
-import { FindManyOptions, Between, LessThanOrEqual } from 'typeorm'
-import typeormService from './typeorm.service'
 import { ServiceRegistration } from '~/entities'
 import { generateId } from '~/utils/gererator'
+import typeormService from './typeorm.service'
 
 interface CreateServiceRegistrationBody {
   customer_name: string
@@ -9,6 +8,8 @@ interface CreateServiceRegistrationBody {
   address?: string
   notes?: string
   duration_months: number
+  amount_paid?: number
+  amount_due?: number
 }
 
 interface UpdateServiceRegistrationBody {
@@ -18,6 +19,8 @@ interface UpdateServiceRegistrationBody {
   notes?: string
   duration_months?: number
   status?: string
+  amount_paid?: number
+  amount_due?: number
 }
 
 interface FilterOptions {
@@ -27,43 +30,57 @@ interface FilterOptions {
   end_date?: Date
   page?: number
   limit?: number
+  payment_status?: string // 'paid', 'unpaid', 'partial'
 }
 
 export class ServiceRegistrationServiceTypeORM {
   // Get all service registrations with optional filters
   static async getServiceRegistrations(filters: FilterOptions = {}) {
-    const { status, expiring_in_days, start_date, end_date, page = 1, limit = 10 } = filters
+    const { status, expiring_in_days, start_date, end_date, page = 1, limit = 10, payment_status } = filters
 
-    const whereConditions: any = {}
+    const queryBuilder = typeormService.serviceRegistrationRepository.createQueryBuilder('registration')
 
     // Filter by status
     if (status) {
-      whereConditions.status = status
+      queryBuilder.andWhere('registration.status = :status', { status })
     }
 
     // Filter by registration date range
     if (start_date && end_date) {
-      whereConditions.registrationDate = Between(start_date, end_date)
+      queryBuilder.andWhere('registration.registrationDate BETWEEN :start_date AND :end_date', { start_date, end_date })
     } else if (start_date) {
-      whereConditions.registrationDate = LessThanOrEqual(start_date)
+      queryBuilder.andWhere('registration.registrationDate >= :start_date', { start_date })
     }
 
     // Filter for records expiring soon
     if (expiring_in_days) {
       const futureDate = new Date()
       futureDate.setDate(futureDate.getDate() + expiring_in_days)
-      whereConditions.end_date = LessThanOrEqual(futureDate)
-      whereConditions.status = 'active' // Only check active registrations
+      queryBuilder.andWhere('registration.end_date <= :futureDate', { futureDate })
+      queryBuilder.andWhere('registration.status = :activeStatus', { activeStatus: 'active' })
     }
 
-    const options: FindManyOptions<ServiceRegistration> = {
-      where: whereConditions,
-      order: { registrationDate: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit
+    // Filter by payment status
+    if (payment_status) {
+      switch (payment_status) {
+        case 'paid':
+          queryBuilder.andWhere('registration.amount_paid >= registration.amount_due')
+          break
+        case 'unpaid':
+          queryBuilder.andWhere('registration.amount_paid < registration.amount_due')
+          break
+        case 'partial':
+          queryBuilder.andWhere('registration.amount_paid > 0 AND registration.amount_paid < registration.amount_due')
+          break
+      }
     }
 
-    const [registrations, total] = await typeormService.serviceRegistrationRepository.findAndCount(options)
+    queryBuilder
+      .orderBy('registration.registrationDate', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+
+    const [registrations, total] = await queryBuilder.getManyAndCount()
 
     return {
       data: registrations,
@@ -97,6 +114,8 @@ export class ServiceRegistrationServiceTypeORM {
     registration.notes = data.notes || ''
     registration.duration_months = data.duration_months
     registration.status = 'active'
+    registration.amount_paid = data.amount_paid || 0
+    registration.amount_due = data.amount_due || 0
 
     // Calculate end date based on duration
     const endDate = new Date()
@@ -118,6 +137,8 @@ export class ServiceRegistrationServiceTypeORM {
     if (updateData.address !== undefined) registration.address = updateData.address
     if (updateData.notes !== undefined) registration.notes = updateData.notes
     if (updateData.status !== undefined) registration.status = updateData.status
+    if (updateData.amount_paid !== undefined) registration.amount_paid = updateData.amount_paid
+    if (updateData.amount_due !== undefined) registration.amount_due = updateData.amount_due
 
     // If duration is updated, recalculate end date
     if (updateData.duration_months !== undefined) {
@@ -189,12 +210,33 @@ export class ServiceRegistrationServiceTypeORM {
     // Get registrations expiring in next 30 days
     const expiringSoon = await this.getExpiringSoon(30)
 
+    // Get payment statistics
+    const paidCount = await typeormService.serviceRegistrationRepository
+      .createQueryBuilder('registration')
+      .where('registration.amount_paid >= registration.amount_due')
+      .getCount()
+
+    const unpaidCount = await typeormService.serviceRegistrationRepository
+      .createQueryBuilder('registration')
+      .where('registration.amount_paid < registration.amount_due')
+      .getCount()
+
+    const partialPaidCount = await typeormService.serviceRegistrationRepository
+      .createQueryBuilder('registration')
+      .where('registration.amount_paid > 0 AND registration.amount_paid < registration.amount_due')
+      .getCount()
+
     return {
       total,
       active,
       expired,
       cancelled,
-      expiring_soon: expiringSoon.total
+      expiring_soon: expiringSoon.total,
+      payment_stats: {
+        paid: paidCount,
+        unpaid: unpaidCount,
+        partial: partialPaidCount
+      }
     }
   }
 }

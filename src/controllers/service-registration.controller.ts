@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import ServiceRegistrationServiceTypeORM from '~/services/service-registration-typeorm.service'
+import { ServiceRegistrationServiceTypeORM } from '~/services/service-registration-typeorm.service'
 
 interface CreateServiceRegistrationBody {
   customer_name: string
