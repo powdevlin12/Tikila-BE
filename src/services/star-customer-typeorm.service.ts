@@ -10,7 +10,7 @@ interface CreateStarCustomerBody {
 export class StarCustomerServiceTypeORM {
   static async createStarCustomer(data: CreateStarCustomerBody) {
     if (data.star < 1 || data.star > 5) {
-      throw new Error('Star rating must be between 1 and 5')
+      throw new Error('Số sao phải từ 1 đến 5')
     }
 
     const starCustomer = new StarCustomer()

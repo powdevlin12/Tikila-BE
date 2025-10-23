@@ -4,13 +4,13 @@ import { StarCustomerServiceTypeORM } from '~/services/star-customer-typeorm.ser
 export class StarCustomerController {
   static async addStarCustomer(req: Request, res: Response, next: NextFunction) {
     try {
-      const { star, name_customer, content } = req.body
+      const { star, nameCustomer, content } = req.body
 
       // Validate required fields
-      if (!star || !name_customer) {
-        return res.status(200).json({
+      if (!star || !nameCustomer) {
+        return res.status(422).json({
           success: false,
-          message: 'Star rating and customer name are required',
+          message: 'Số sao và tên khách hàng là bắt buộc',
           data: []
         })
       }
@@ -18,16 +18,16 @@ export class StarCustomerController {
       // Validate star rating
       const starRating = parseInt(star)
       if (isNaN(starRating) || starRating < 1 || starRating > 5) {
-        return res.status(200).json({
+        return res.status(422).json({
           success: false,
-          message: 'Star rating must be a number between 1 and 5',
+          message: 'Số sao phải là một số từ 1 đến 5',
           data: []
         })
       }
 
       const result = await StarCustomerServiceTypeORM.createStarCustomer({
         star: starRating,
-        name_customer: name_customer.trim(),
+        name_customer: nameCustomer.trim(),
         content: content || ''
       })
 
