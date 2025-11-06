@@ -118,6 +118,17 @@ export class ServiceRegistrationController {
     }
   }
 
+  async extendServiceRegistration(req: Request, res: Response) {
+    const { id } = req.params
+    const registration = await ServiceRegistrationServiceTypeORM.extendServiceRegistration(id, req.body)
+
+    return res.status(200).json({
+      success: true,
+      message: 'Gia hạn đăng ký dịch vụ thành công',
+      data: registration
+    })
+  }
+
   // Delete service registration (soft delete)
   async deleteServiceRegistration(req: Request, res: Response) {
     try {

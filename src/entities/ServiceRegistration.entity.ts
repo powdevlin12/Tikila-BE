@@ -8,6 +8,9 @@ export class ServiceRegistration {
   @Column({ type: 'varchar', length: 255, nullable: false })
   customer_name: string
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  parent_id: string
+
   @Column({ type: 'varchar', length: 15, nullable: false })
   phone: string
 

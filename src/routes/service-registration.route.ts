@@ -34,6 +34,12 @@ serviceRegistrationRouter.put(
   wrapRequestHandler(serviceRegistrationController.updateServiceRegistration)
 )
 
+serviceRegistrationRouter.put(
+  '/extend/:id',
+  validate(accessTokenValidator),
+  wrapRequestHandler(serviceRegistrationController.extendServiceRegistration)
+)
+
 // Delete service registration (soft delete)
 serviceRegistrationRouter.delete(
   '/:id',

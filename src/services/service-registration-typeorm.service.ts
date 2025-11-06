@@ -10,6 +10,7 @@ interface CreateServiceRegistrationBody {
   duration_months: number
   amount_paid?: number
   amount_due?: number
+  parent_id?: string
   registration_date: Date
 }
 
@@ -20,6 +21,13 @@ interface UpdateServiceRegistrationBody {
   notes?: string
   duration_months?: number
   status?: string
+  amount_paid?: number
+  amount_due?: number
+  parent_id?: string
+}
+
+interface ExtendServiceRegistrationBody {
+  duration_months?: number
   amount_paid?: number
   amount_due?: number
 }
@@ -118,6 +126,7 @@ export class ServiceRegistrationServiceTypeORM {
     registration.amount_paid = data.amount_paid || 0
     registration.amount_due = data.amount_due || 0
     registration.registrationDate = new Date(data.registration_date)
+    registration.parent_id = data.parent_id || ''
 
     // Calculate end date based on duration
     const endDate = new Date(data.registration_date)
@@ -141,6 +150,7 @@ export class ServiceRegistrationServiceTypeORM {
     if (updateData.status !== undefined) registration.status = updateData.status
     if (updateData.amount_paid !== undefined) registration.amount_paid = updateData.amount_paid
     if (updateData.amount_due !== undefined) registration.amount_due = updateData.amount_due
+    registration.parent_id = updateData?.parent_id || ''
 
     // If duration is updated, recalculate end date
     if (updateData.duration_months !== undefined) {
@@ -153,11 +163,35 @@ export class ServiceRegistrationServiceTypeORM {
     return await typeormService.serviceRegistrationRepository.save(registration)
   }
 
+  static async extendServiceRegistration(id: string, extendData: ExtendServiceRegistrationBody) {
+    const registration = await this.getServiceRegistrationById(id)
+
+    // Extend duration if provided
+    if (extendData.duration_months !== undefined) {
+      registration.duration_months += extendData.duration_months
+      const newEndDate = new Date(registration.end_date)
+      newEndDate.setMonth(newEndDate.getMonth() + extendData.duration_months)
+      registration.end_date = newEndDate
+    }
+
+    // Update amount paid if provided
+    if (extendData.amount_paid !== undefined) {
+      registration.amount_paid = Number(extendData.amount_paid) + Number(registration.amount_paid)
+    }
+
+    // Update amount due if provided
+    if (extendData.amount_due !== undefined) {
+      registration.amount_due = Number(extendData.amount_due) + Number(registration.amount_due)
+    }
+
+    return await typeormService.serviceRegistrationRepository.save(registration)
+  }
+
   // Delete service registration (soft delete by changing status)
   static async deleteServiceRegistration(id: string) {
-    return await typeormService.serviceRegistrationRepository.delete({
-      id
-    })
+    const registration = await this.getServiceRegistrationById(id)
+    registration.status = 'cancelled'
+    return await typeormService.serviceRegistrationRepository.save(registration) // Soft delete by updating status
   }
 
   // Hard delete service registration
