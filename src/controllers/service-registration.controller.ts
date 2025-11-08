@@ -42,6 +42,12 @@ export class ServiceRegistrationController {
       if (req.query.end_date && typeof req.query.end_date === 'string') filters.end_date = new Date(req.query.end_date)
       if (req.query.page && typeof req.query.page === 'string') filters.page = parseInt(req.query.page)
       if (req.query.limit && typeof req.query.limit === 'string') filters.limit = parseInt(req.query.limit)
+      if (req.query.payment_status && typeof req.query.payment_status === 'string') {
+        filters.payment_status = req.query.payment_status
+        console.log('Received payment_status from query:', req.query.payment_status)
+      }
+
+      console.log('Controller filters:', filters)
 
       const result = await ServiceRegistrationServiceTypeORM.getServiceRegistrations(filters)
 

@@ -69,19 +69,22 @@ export class ServiceRegistrationServiceTypeORM {
       queryBuilder.andWhere('registration.status = :activeStatus', { activeStatus: 'active' })
     }
 
-    // Filter by payment status
-    if (payment_status) {
+    // Filter by payment status - only apply if valid value is provided
+    if (payment_status && ['paid', 'unpaid', 'partial'].includes(payment_status)) {
+      console.log('Applying payment_status filter:', payment_status)
       switch (payment_status) {
         case 'paid':
           queryBuilder.andWhere('registration.amount_paid >= registration.amount_due')
           break
         case 'unpaid':
-          queryBuilder.andWhere('registration.amount_paid < registration.amount_due')
+          queryBuilder.andWhere('registration.amount_paid = 0 AND registration.amount_due > 0')
           break
         case 'partial':
           queryBuilder.andWhere('registration.amount_paid > 0 AND registration.amount_paid < registration.amount_due')
           break
       }
+    } else if (payment_status) {
+      console.warn('Invalid payment_status value:', payment_status)
     }
 
     queryBuilder
@@ -253,7 +256,7 @@ export class ServiceRegistrationServiceTypeORM {
 
     const unpaidCount = await typeormService.serviceRegistrationRepository
       .createQueryBuilder('registration')
-      .where('registration.amount_paid = 0')
+      .where('registration.amount_paid = 0 && registration.amount_due > 0')
       .getCount()
 
     const partialPaidCount = await typeormService.serviceRegistrationRepository
