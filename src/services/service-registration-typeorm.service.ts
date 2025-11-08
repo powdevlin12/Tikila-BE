@@ -240,7 +240,6 @@ export class ServiceRegistrationServiceTypeORM {
   static async getStatistics() {
     const total = await typeormService.serviceRegistrationRepository.count()
     const active = await typeormService.serviceRegistrationRepository.count({ where: { status: 'active' } })
-    const expired = await typeormService.serviceRegistrationRepository.count({ where: { status: 'expired' } })
     const cancelled = await typeormService.serviceRegistrationRepository.count({ where: { status: 'cancelled' } })
 
     // Get registrations expiring in next 30 days
@@ -254,7 +253,7 @@ export class ServiceRegistrationServiceTypeORM {
 
     const unpaidCount = await typeormService.serviceRegistrationRepository
       .createQueryBuilder('registration')
-      .where('registration.amount_paid < registration.amount_due')
+      .where('registration.amount_paid = 0')
       .getCount()
 
     const partialPaidCount = await typeormService.serviceRegistrationRepository
@@ -265,7 +264,6 @@ export class ServiceRegistrationServiceTypeORM {
     return {
       total,
       active,
-      expired,
       cancelled,
       expiring_soon: expiringSoon.total,
       payment_stats: {

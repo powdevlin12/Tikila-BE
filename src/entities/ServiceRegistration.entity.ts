@@ -29,7 +29,7 @@ export class ServiceRegistration {
   @Column({ type: 'datetime', nullable: false })
   end_date: Date
 
-  @Column({ type: 'varchar', length: 20, default: 'active', comment: 'active, expired, cancelled' })
+  @Column({ type: 'varchar', length: 20, default: 'active', comment: 'active, cancelled' })
   status: string
 
   @Column({ type: 'decimal', precision: 15, scale: 0, default: 0, comment: 'Amount paid by customer' })
