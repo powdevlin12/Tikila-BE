@@ -46,6 +46,10 @@ export class ServiceRegistrationController {
         filters.payment_status = req.query.payment_status
         console.log('Received payment_status from query:', req.query.payment_status)
       }
+      if (req.query.search && typeof req.query.search === 'string') {
+        filters.search = req.query.search
+        console.log('Received search from query:', req.query.search)
+      }
 
       console.log('Controller filters:', filters)
 

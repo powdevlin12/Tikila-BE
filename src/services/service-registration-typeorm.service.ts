@@ -40,14 +40,23 @@ interface FilterOptions {
   page?: number
   limit?: number
   payment_status?: string // 'paid', 'unpaid', 'partial'
+  search?: string // Search in notes, customer_name, phone, address
 }
 
 export class ServiceRegistrationServiceTypeORM {
   // Get all service registrations with optional filters
   static async getServiceRegistrations(filters: FilterOptions = {}) {
-    const { status, expiring_in_days, start_date, end_date, page = 1, limit = 10, payment_status } = filters
+    const { status, expiring_in_days, start_date, end_date, page = 1, limit = 10, payment_status, search } = filters
 
     const queryBuilder = typeormService.serviceRegistrationRepository.createQueryBuilder('registration')
+
+    // Search filter - tìm kiếm trong notes, customer_name, phone, address
+    if (search) {
+      queryBuilder.andWhere(
+        '(LOWER(registration.notes) LIKE LOWER(:search) OR LOWER(registration.customer_name) LIKE LOWER(:search) OR registration.phone LIKE :search OR LOWER(registration.address) LIKE LOWER(:search))',
+        { search: `%${search}%` }
+      )
+    }
 
     // Filter by status
     if (status) {
