@@ -37,5 +37,9 @@ export const envConfig = {
   forgotVerifyTokenExprireIn: process.env.FORGOT_PASSWORD_VERIFY_TOKEN_EXPIRE_IN as string,
   googleClientId: process.env.GOOGLE_CLIENT_ID as string,
   googleRedirectURI: process.env.GOOGLE_REDIRECT_URI as string,
-  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+  // Cloudinary Configuration
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME as string,
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY as string,
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET as string
 }

@@ -7,12 +7,12 @@ import {
   handleUploadImageWithFieldsOptional
 } from '~/utils/file'
 import sharp from 'sharp'
-import { UPLOAD_IMG_FOLDER } from '~/constants/dir'
-import path from 'path'
-import fs from 'fs'
 import { isProduction } from '~/constants/media'
 import { MediaType } from '~/constants/enums'
 import { envConfig } from '~/constants/config'
+import cloudinary from '~/config/cloudinary'
+import fs from 'fs'
+import { Readable } from 'stream'
 
 class MediaService {
   async handleUploadImage(req: Request) {
@@ -21,16 +21,39 @@ class MediaService {
     const data = await Promise.all(
       files.map(async (file) => {
         const newNameFile = getFileName(file.newFilename)
-        await sharp(file.filepath)
+
+        // Process image with sharp and convert to buffer
+        const imageBuffer = await sharp(file.filepath)
           .jpeg({
             quality: 60
           })
-          .toFile(path.resolve(UPLOAD_IMG_FOLDER, `${newNameFile}.jpg`))
+          .toBuffer()
+
+        // Clean up uploaded temp file
         fs.unlinkSync(file.filepath)
+
+        // Upload buffer to Cloudinary using stream
+        const result = await new Promise<any>((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: 'tikila/images',
+              public_id: newNameFile,
+              resource_type: 'image'
+            },
+            (error, result) => {
+              if (error) reject(error)
+              else resolve(result)
+            }
+          )
+
+          const bufferStream = new Readable()
+          bufferStream.push(imageBuffer)
+          bufferStream.push(null)
+          bufferStream.pipe(uploadStream)
+        })
+
         return {
-          url: isProduction
-            ? `${envConfig.host}/statics/image/${newNameFile}.jpg`
-            : `http://localhost:${envConfig.portServer}/statics/image/${newNameFile}.jpg`,
+          url: result.secure_url,
           type: MediaType.Image
         }
       })
@@ -45,16 +68,39 @@ class MediaService {
     const data = await Promise.all(
       files.map(async (file) => {
         const newNameFile = getFileName(file.newFilename)
-        await sharp(file.filepath)
+
+        // Process image with sharp and convert to buffer
+        const imageBuffer = await sharp(file.filepath)
           .jpeg({
             quality: 60
           })
-          .toFile(path.resolve(UPLOAD_IMG_FOLDER, `${newNameFile}.jpg`))
+          .toBuffer()
+
+        // Clean up uploaded temp file
         fs.unlinkSync(file.filepath)
+
+        // Upload buffer to Cloudinary using stream
+        const result = await new Promise<any>((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: 'tikila/images',
+              public_id: newNameFile,
+              resource_type: 'image'
+            },
+            (error, result) => {
+              if (error) reject(error)
+              else resolve(result)
+            }
+          )
+
+          const bufferStream = new Readable()
+          bufferStream.push(imageBuffer)
+          bufferStream.push(null)
+          bufferStream.pipe(uploadStream)
+        })
+
         return {
-          url: isProduction
-            ? `${envConfig.host}/statics/image/${newNameFile}.jpg`
-            : `http://localhost:${envConfig.portServer}/statics/image/${newNameFile}.jpg`,
+          url: result.secure_url,
           type: MediaType.Image
         }
       })
@@ -69,16 +115,39 @@ class MediaService {
     const data = await Promise.all(
       files.map(async (file) => {
         const newNameFile = getFileName(file.newFilename)
-        await sharp(file.filepath)
+
+        // Process image with sharp and convert to buffer
+        const imageBuffer = await sharp(file.filepath)
           .jpeg({
             quality: 60
           })
-          .toFile(path.resolve(UPLOAD_IMG_FOLDER, `${newNameFile}.jpg`))
+          .toBuffer()
+
+        // Clean up uploaded temp file
         fs.unlinkSync(file.filepath)
+
+        // Upload buffer to Cloudinary using stream
+        const result = await new Promise<any>((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: 'tikila/images',
+              public_id: newNameFile,
+              resource_type: 'image'
+            },
+            (error, result) => {
+              if (error) reject(error)
+              else resolve(result)
+            }
+          )
+
+          const bufferStream = new Readable()
+          bufferStream.push(imageBuffer)
+          bufferStream.push(null)
+          bufferStream.pipe(uploadStream)
+        })
+
         return {
-          url: isProduction
-            ? `${envConfig.host}/statics/image/${newNameFile}.jpg`
-            : `http://localhost:${envConfig.portServer}/statics/image/${newNameFile}.jpg`,
+          url: result.secure_url,
           type: MediaType.Image
         }
       })

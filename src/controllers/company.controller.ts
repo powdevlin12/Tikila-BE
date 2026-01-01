@@ -89,6 +89,9 @@ export class CompanyController {
 
       const url = await mediaService.handleUploadImage(req)
 
+      console.log({
+        url
+      })
       await CompanyServiceTypeORM.updateCompanyInfo({
         banner: url?.[0]?.url ?? ''
       })
@@ -103,6 +106,7 @@ export class CompanyController {
         message: 'Cập nhật banner công ty thành công'
       })
     } catch (error) {
+      console.log(error)
       return res.status(500).json({
         success: false,
         message: 'Lỗi server khi cập nhật banner công ty'
