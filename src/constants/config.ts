@@ -16,7 +16,6 @@ config({
 })
 
 export const envConfig = {
-  host: process.env.HOST as string,
   // ** default admin account
   adminUserDefault: process.env.ADMIN_USER_DEFAULT as string,
   adminPasswordDefault: process.env.ADMIN_PASSWORD_DEFAULT as string,

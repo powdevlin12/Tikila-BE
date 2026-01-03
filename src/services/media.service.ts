@@ -234,9 +234,7 @@ class MediaService {
     const { newFilename } = file
 
     return {
-      url: isProduction
-        ? `${envConfig.host}/statics/video/${newFilename}`
-        : `http://localhost:${envConfig.portServer}/statics/video/${newFilename}`,
+      url: `http://localhost:${envConfig.portServer}/statics/video/${newFilename}`,
       type: MediaType.Video
     }
   }

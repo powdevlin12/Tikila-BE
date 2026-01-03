@@ -2,17 +2,17 @@
 
 The Tikila project consists of three main parts:
 
-* **tikila-BE**: Backend API (Node.js + Express + TypeScript + MySQL)
-* **tikila-admin**: Admin Dashboard (React + TypeScript + Vite)
-* **tikila-FE**: Frontend Website (React + TypeScript + Vite)
+- **[tikila-BE](https://github.com/powdevlin12/Tikila-BE)**: Backend API (Node.js + Express + TypeScript + MySQL)
+- **[tikila-admin](https://github.com/powdevlin12/tikila-admin)**: Admin Dashboard (React + TypeScript + Vite)
+- **[tikila-FE](https://github.com/powdevlin12/tikila-FE)**: Frontend Website (React + TypeScript + Vite)
 
 ---
 
 ## System Requirements
 
-* Node.js >= 18.x
-* MySQL >= 8.0
-* npm or yarn or pm2
+- Node.js >= 18.x
+- MySQL >= 8.0
+- npm or yarn or pm2
 
 ---
 
@@ -64,7 +64,7 @@ ACCESS_TOKEN_EXPIRE_IN=15m
 REFRESH_TOKEN_EXPIRE_IN=100d
 
 # Default Admin Account
-ADMIN_USER_DEFAULT=admin@gmail.com 
+ADMIN_USER_DEFAULT=admin@gmail.com
 ADMIN_PASSWORD_DEFAULT=!Thudat68
 ```
 
@@ -78,9 +78,9 @@ Server will run at `http://localhost:1236`
 
 **Notes:** On the first run, the system automatically:
 
-* Creates database tables via TypeORM
-* Creates default admin account: `admin@gmail.com` / `!Thudat68`
-* Inserts default `company_info` data
+- Creates database tables via TypeORM
+- Creates default admin account: `admin@gmail.com` / `!Thudat68`
+- Inserts default `company_info` data
 
 ---
 
@@ -117,8 +117,8 @@ Admin Dashboard: `http://localhost:5173`
 
 Login with default credentials:
 
-* **Email:** `admin@gmail.com`
-* **Password:** `!Thudat68`
+- **Email:** `admin@gmail.com`
+- **Password:** `!Thudat68`
 
 ### Step 4: Build for Production
 
