@@ -66,6 +66,11 @@ REFRESH_TOKEN_EXPIRE_IN=100d
 # Default Admin Account
 ADMIN_USER_DEFAULT=admin@gmail.com
 ADMIN_PASSWORD_DEFAULT=!Thudat68
+
+# Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME = 'your_cloud_name'
+CLOUDINARY_API_KEY = 'your_api_key'
+CLOUDINARY_API_SECRET = 'your_api_secret'
 ```
 
 ### Step 3: Start the Server
