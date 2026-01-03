@@ -1,8 +1,11 @@
 import { Request, Response } from 'express'
 import mediaService from '~/services/media.service'
-import mysqlService from '~/services/mysql.service'
 import { deleteOldImage } from '~/utils/file'
 import CompanyServiceTypeORM from '~/services/company-typeorm.service'
+import ContactCompanyServiceTypeORM from '~/services/contact-company-typeorm.service'
+import ServiceServiceTypeORM from '~/services/service-typeorm.service'
+import ContactCustomerServiceTypeORM from '~/services/contact-customer-typeorm.service'
+import FooterLinkServiceTypeORM from '~/services/footer-link-typeorm.service'
 
 export class CompanyController {
   // Lấy thông tin công ty
@@ -29,16 +32,14 @@ export class CompanyController {
       const companyInfo = await CompanyServiceTypeORM.getCompanyInfo()
       const currentLogoUrl = companyInfo.logoUrl
 
-      const url = await mediaService.handleUploadImage(req)
+      const url = await mediaService.handleUploadImage(req, {
+        entityType: 'company_logo',
+        oldImageUrl: currentLogoUrl
+      })
 
       await CompanyServiceTypeORM.updateCompanyInfo({
         logo_url: url?.[0]?.url ?? ''
       })
-
-      // Delete old image after successful update
-      if (currentLogoUrl) {
-        deleteOldImage(currentLogoUrl)
-      }
 
       return res.status(200).json({
         success: true,
@@ -58,16 +59,14 @@ export class CompanyController {
       const companyInfo = await CompanyServiceTypeORM.getCompanyInfo()
       const currentImgUrl = companyInfo.imgIntro
 
-      const url = await mediaService.handleUploadImage(req)
+      const url = await mediaService.handleUploadImage(req, {
+        entityType: 'company_intro',
+        oldImageUrl: currentImgUrl
+      })
 
       await CompanyServiceTypeORM.updateCompanyInfo({
         img_intro: url?.[0]?.url ?? ''
       })
-
-      // Delete old image after successful update
-      if (currentImgUrl) {
-        deleteOldImage(currentImgUrl)
-      }
 
       return res.status(200).json({
         success: true,
@@ -87,7 +86,10 @@ export class CompanyController {
       const companyInfo = await CompanyServiceTypeORM.getCompanyInfo()
       const currentBannerUrl = companyInfo.banner
 
-      const url = await mediaService.handleUploadImage(req)
+      const url = await mediaService.handleUploadImage(req, {
+        entityType: 'company_banner',
+        oldImageUrl: currentBannerUrl
+      })
 
       console.log({
         url
@@ -95,11 +97,6 @@ export class CompanyController {
       await CompanyServiceTypeORM.updateCompanyInfo({
         banner: url?.[0]?.url ?? ''
       })
-
-      // Delete old image after successful update
-      if (currentBannerUrl) {
-        deleteOldImage(currentBannerUrl)
-      }
 
       return res.status(200).json({
         success: true,
@@ -149,12 +146,12 @@ export class CompanyController {
   // Lấy thông tin liên hệ
   async getContactInfo(req: Request, res: Response) {
     try {
-      const contactInfo = await mysqlService.query('SELECT * FROM contact_company LIMIT 1')
+      const contactInfo = await ContactCompanyServiceTypeORM.getContactInfo()
 
       return res.status(200).json({
         success: true,
         message: 'Lấy thông tin liên hệ thành công',
-        data: contactInfo[0] || {}
+        data: contactInfo
       })
     } catch (error) {
       return res.status(500).json({
@@ -169,53 +166,12 @@ export class CompanyController {
     try {
       const { phone, facebook_link, zalo_link, tiktok_link } = req.body
 
-      // Kiểm tra xem đã có record nào chưa
-      const existingContact = await mysqlService.query('SELECT id FROM contact_company LIMIT 1')
-
-      if (existingContact.length === 0) {
-        // Tạo mới nếu chưa có
-        const insertQuery = `
-          INSERT INTO contact_company (phone, facebook_link, zalo_link, tiktok_link, created_at)
-          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-        `
-        await mysqlService.query(insertQuery, [
-          phone || null,
-          facebook_link || null,
-          zalo_link || null,
-          tiktok_link || null
-        ])
-      } else {
-        // Cập nhật chỉ những trường được gửi lên
-        const fieldsToUpdate: string[] = []
-        const values: any[] = []
-
-        if (phone !== undefined) {
-          fieldsToUpdate.push('phone = ?')
-          values.push(phone || null)
-        }
-        if (facebook_link !== undefined) {
-          fieldsToUpdate.push('facebook_link = ?')
-          values.push(facebook_link || null)
-        }
-        if (zalo_link !== undefined) {
-          fieldsToUpdate.push('zalo_link = ?')
-          values.push(zalo_link || null)
-        }
-        if (tiktok_link !== undefined) {
-          fieldsToUpdate.push('tiktok_link = ?')
-          values.push(tiktok_link || null)
-        }
-
-        if (fieldsToUpdate.length > 0) {
-          const updateQuery = `
-            UPDATE contact_company 
-            SET ${fieldsToUpdate.join(', ')}
-            WHERE id = ?
-          `
-          values.push(existingContact[0].id)
-          await mysqlService.query(updateQuery, values)
-        }
-      }
+      await ContactCompanyServiceTypeORM.updateContactInfo({
+        phone,
+        facebook_link,
+        zalo_link,
+        tiktok_link
+      })
 
       return res.status(200).json({
         success: true,
@@ -233,9 +189,7 @@ export class CompanyController {
   // Lấy danh sách dịch vụ
   async getServices(req: Request, res: Response) {
     try {
-      const services = await mysqlService.query(
-        'SELECT * FROM services WHERE is_delete = FALSE ORDER BY created_at DESC'
-      )
+      const services = await ServiceServiceTypeORM.getAllServices()
 
       return res.status(200).json({
         success: true,
@@ -255,17 +209,17 @@ export class CompanyController {
     try {
       const { title, description, image_url, company_id } = req.body
 
-      const insertQuery = `
-        INSERT INTO services (title, description, image_url, company_id) 
-        VALUES (?, ?, ?, ?)
-      `
-
-      const result: any = await mysqlService.query(insertQuery, [title, description, image_url, company_id || 1])
+      const service = await ServiceServiceTypeORM.createService({
+        title,
+        description,
+        image_url,
+        company_id
+      })
 
       return res.status(201).json({
         success: true,
         message: 'Tạo dịch vụ mới thành công',
-        data: { id: result.insertId }
+        data: { id: service.id }
       })
     } catch (error) {
       return res.status(500).json({
@@ -280,12 +234,11 @@ export class CompanyController {
     try {
       const { full_name, phone_customer, message } = req.body
 
-      const insertQuery = `
-        INSERT INTO contact_customer (full_name, phone_customer, message) 
-        VALUES (?, ?, ?)
-      `
-
-      await mysqlService.query(insertQuery, [full_name, phone_customer, message])
+      await ContactCustomerServiceTypeORM.createContact({
+        full_name,
+        phone_customer,
+        message
+      })
 
       return res.status(201).json({
         success: true,
@@ -302,7 +255,7 @@ export class CompanyController {
   // Lấy footer links
   async getFooterLinks(req: Request, res: Response) {
     try {
-      const footerLinks = await mysqlService.query('SELECT * FROM footer_links ORDER BY column_position, id')
+      const footerLinks = await FooterLinkServiceTypeORM.getAllFooterLinks()
 
       return res.status(200).json({
         success: true,

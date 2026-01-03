@@ -13,7 +13,7 @@ export const USER_MESSAGE = {
   USER_NOT_FOUND: 'User not found',
   LOGIN_SUCCESS: 'Login success',
   REGISTERE_SUCCESS: 'Đăng ký tài khoản thành công',
-  EMAIL_OR_PASSWORD_INCORRECT: 'Email or password incorrect',
+  EMAIL_OR_PASSWORD_INCORRECT: 'Tài khoản hoặc Mật khẩu không đúng',
   ACCCESS_TOKEN_IS_REQUESTED: 'Access token is requested',
   ACCESS_TOKEN_INVALID: 'Access token is invalid',
   REFRESH_TOKEN_IS_REQUESTED: 'Refresh token is requested',

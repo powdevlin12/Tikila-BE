@@ -52,15 +52,29 @@ export class ProductControllerTypeORM {
         })
       }
 
+      // First, create the product to get the ID
       const productData = {
         title,
         description,
-        image_url,
+        image_url: image_url, // Use temporary URL first
         company_id: isNaN(company_id) ? null : company_id,
         detail_info: detail_info || null
       }
 
       const result = await ProductServiceTypeORM.addProduct(productData)
+
+      // Now rename image on Cloudinary with proper product ID
+      if (result && result.id && image_url) {
+        try {
+          const newImageUrl = await mediaService.renameImageOnCloudinary(image_url, `product_${result.id}`)
+          await ProductServiceTypeORM.updateProduct(result.id, {
+            image_url: newImageUrl
+          })
+        } catch (error) {
+          console.error('Error renaming image:', error)
+          // Keep the original image URL if rename fails
+        }
+      }
 
       return res.status(200).json({
         success: true,
@@ -162,16 +176,15 @@ export class ProductControllerTypeORM {
 
       if (isMultipart) {
         try {
-          const result = await mediaService.handleUploadImageWithFieldsOptional(req)
+          const result = await mediaService.handleUploadImageWithFieldsOptional(req, {
+            entityType: 'product',
+            entityId: parseInt(id),
+            oldImageUrl: existingProduct.imageUrl
+          })
 
           // Only update image if new image is provided
           if (result.images && result.images.length > 0) {
             updateData.image_url = result.images[0].url
-
-            // Delete old image if exists
-            if (existingProduct.imageUrl) {
-              await deleteOldImage(existingProduct.imageUrl)
-            }
           }
 
           // Extract fields from the form data
