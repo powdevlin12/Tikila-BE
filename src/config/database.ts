@@ -11,6 +11,7 @@ import {
   ContactCustomer,
   StarCustomer,
   ServiceRegistration,
+  ServiceRegistrationDevice,
   DashboardStatistics,
   FooterColumn
 } from '~/entities'
@@ -37,6 +38,7 @@ export const AppDataSource = new DataSource({
     ContactCustomer,
     StarCustomer,
     ServiceRegistration,
+    ServiceRegistrationDevice,
     DashboardStatistics,
     FooterColumn
   ],
