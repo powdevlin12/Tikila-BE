@@ -104,8 +104,39 @@ export class ServiceRegistrationServiceTypeORM {
 
     const [registrations, total] = await queryBuilder.getManyAndCount()
 
+    const registrationIds = registrations.map((r) => r.id)
+    const deviceAggregates: Record<string, { device_count: number; nearest_device_end_date: Date | null }> = {}
+
+    if (registrationIds.length > 0) {
+      const rows = await typeormService.serviceRegistrationDeviceRepository
+        .createQueryBuilder('device')
+        .select('device.service_registration_id', 'service_registration_id')
+        .addSelect('COUNT(device.id)', 'device_count')
+        .addSelect(
+          'MIN(CASE WHEN device.status = :activeStatus THEN device.end_date ELSE NULL END)',
+          'nearest_device_end_date'
+        )
+        .where('device.service_registration_id IN (:...registrationIds)', { registrationIds })
+        .setParameter('activeStatus', 'active')
+        .groupBy('device.service_registration_id')
+        .getRawMany()
+
+      for (const row of rows) {
+        deviceAggregates[row.service_registration_id] = {
+          device_count: Number(row.device_count),
+          nearest_device_end_date: row.nearest_device_end_date
+        }
+      }
+    }
+
+    const data = registrations.map((registration) => ({
+      ...registration,
+      device_count: deviceAggregates[registration.id]?.device_count || 0,
+      nearest_device_end_date: deviceAggregates[registration.id]?.nearest_device_end_date || null
+    }))
+
     return {
-      data: registrations,
+      data,
       total,
       page,
       limit,
