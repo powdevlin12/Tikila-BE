@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write ."
+    "prettier:fix": "prettier --write .",
+    "migrate:devices": "npx ts-node src/scripts/migrate-service-registrations-to-devices.ts"
   },
   "keywords": [],
   "author": "",
