@@ -22,6 +22,7 @@ import contactCustomerRouter from './routes/contact-customer.route'
 import footerLinkRoute from './routes/footer-link.route'
 import starCustomerRouter from './routes/star-customer.route'
 import serviceRegistrationRouter from './routes/service-registration.route'
+import serviceRegistrationDeviceRouter from './routes/service-registration-device.route'
 import dashboardRouter from './routes/dashboard.route'
 import footerColumnRoute from './routes/footer-column.route'
 
@@ -62,6 +63,7 @@ app.use('/footer-links', footerLinkRoute)
 app.use('/footer-columns', footerColumnRoute)
 app.use('/star-customers', starCustomerRouter)
 app.use('/service-registrations', serviceRegistrationRouter)
+app.use('/service-registration-devices', serviceRegistrationDeviceRouter)
 app.use('/dashboard', dashboardRouter)
 app.use('/statics/video', express.static(UPLOAD_VIDEO_FOLDER))
 
