@@ -24,6 +24,7 @@ interface UpdateServiceRegistrationBody {
   amount_paid?: number
   amount_due?: number
   parent_id?: string
+  registration_date?: string
 }
 
 interface ExtendServiceRegistrationBody {
@@ -162,6 +163,8 @@ export class ServiceRegistrationServiceTypeORM {
     if (updateData.status !== undefined) registration.status = updateData.status
     if (updateData.amount_paid !== undefined) registration.amount_paid = updateData.amount_paid
     if (updateData.amount_due !== undefined) registration.amount_due = updateData.amount_due
+    if (updateData.registration_date !== undefined)
+      registration.registrationDate = new Date(updateData.registration_date)
     registration.parent_id = updateData?.parent_id || ''
 
     // If duration is updated, recalculate end date
