@@ -1,0 +1,17 @@
+FROM node:20-alpine3.16
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY nodemon.json ./
+COPY doc-api.yaml ./
+COPY ./src ./src
+
+# python3 cần cho việc build native module (sharp) trên alpine
+RUN apk add python3
+RUN npm install
+
+EXPOSE 1236
+
+CMD ["npm", "run", "dev"]
