@@ -24,6 +24,8 @@ import starCustomerRouter from './routes/star-customer.route'
 import serviceRegistrationRouter from './routes/service-registration.route'
 import dashboardRouter from './routes/dashboard.route'
 import footerColumnRoute from './routes/footer-column.route'
+import newsRouter from '~/routes/news.route'
+import newsAdminRouter from '~/routes/news-admin.route'
 
 const file = fs.readFileSync(path.resolve('doc-api.yaml'), 'utf-8')
 const swaggerDocument = YAML.parse(file)
@@ -57,6 +59,8 @@ app.use('/medias', mediasRouter)
 app.use('/statics', staticsRouter)
 app.use('/company', companyRouter)
 app.use('/products', productRouter)
+app.use('/news', newsRouter)
+app.use('/admin/news', newsAdminRouter)
 app.use('/contact-customer', contactCustomerRouter)
 app.use('/footer-links', footerLinkRoute)
 app.use('/footer-columns', footerColumnRoute)
