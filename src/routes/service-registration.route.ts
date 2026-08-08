@@ -13,6 +13,14 @@ serviceRegistrationRouter.get(
   wrapRequestHandler(serviceRegistrationController.getServiceRegistrations)
 )
 
+// Export all service registrations to Excel
+// LƯU Ý: phải khai báo trước route '/:id', nếu không '/:id' sẽ khớp '/export' trước
+serviceRegistrationRouter.get(
+  '/export',
+  validate(accessTokenValidator),
+  wrapRequestHandler(serviceRegistrationController.exportServiceRegistrations)
+)
+
 // Get service registration by ID
 serviceRegistrationRouter.get(
   '/:id',

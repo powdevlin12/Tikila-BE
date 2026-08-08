@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { ServiceRegistrationServiceTypeORM } from '~/services/service-registration-typeorm.service'
+import ExcelJS from 'exceljs'
 
 interface CreateServiceRegistrationBody {
   customer_name: string
@@ -251,6 +252,99 @@ export class ServiceRegistrationController {
       return res.status(500).json({
         success: false,
         message: 'Lỗi khi lấy thống kê đăng ký dịch vụ',
+        error: error.message
+      })
+    }
+  }
+
+  // Export all service registrations to an Excel file
+  async exportServiceRegistrations(req: Request, res: Response) {
+    try {
+      const registrations = await ServiceRegistrationServiceTypeORM.getAllForExport()
+
+      // Map id -> customer_name để resolve cột "Thuộc về" mà không cần query thêm
+      const nameById = new Map<string, string>()
+      registrations.forEach((item) => nameById.set(item.id, item.customer_name))
+
+      console.dir({
+        registrations
+      })
+
+      const statusLabel = (status: string) => {
+        if (status === 'active') return 'Đang hoạt động'
+        if (status === 'cancelled') return 'Đã hủy'
+        return status
+      }
+
+      const parentLabel = (parentId: string) => {
+        if (!parentId) return 'Doanh nghiệp chính'
+        return nameById.get(parentId) || 'Không tìm thấy'
+      }
+
+      const now = Date.now()
+      const daysLeft = (endDate: Date) => {
+        if (!endDate) return 0
+        return Math.ceil((new Date(endDate).getTime() - now) / (1000 * 60 * 60 * 24))
+      }
+
+      const workbook = new ExcelJS.Workbook()
+      const sheet = workbook.addWorksheet('Đăng ký dịch vụ', {
+        views: [{ state: 'frozen', ySplit: 1 }]
+      })
+
+      sheet.columns = [
+        { header: 'Tên khách hàng', key: 'customer_name', width: 28 },
+        { header: 'Thuộc về', key: 'parent_name', width: 24 },
+        { header: 'Số điện thoại', key: 'phone', width: 16 },
+        { header: 'Địa chỉ', key: 'address', width: 36 },
+        { header: 'Ghi chú', key: 'notes', width: 36 },
+        { header: 'Ngày đăng ký', key: 'registration_date', width: 14, style: { numFmt: 'dd/mm/yyyy' } },
+        { header: 'Số tháng', key: 'duration_months', width: 10 },
+        { header: 'Ngày kết thúc', key: 'end_date', width: 14, style: { numFmt: 'dd/mm/yyyy' } },
+        { header: 'Số ngày còn lại', key: 'days_left', width: 15 },
+        { header: 'Trạng thái', key: 'status', width: 16 },
+        { header: 'Tiền phải trả', key: 'amount_due', width: 16, style: { numFmt: '#,##0' } },
+        { header: 'Đã thanh toán', key: 'amount_paid', width: 16, style: { numFmt: '#,##0' } },
+        { header: 'Còn thiếu', key: 'amount_remaining', width: 16, style: { numFmt: '#,##0' } },
+        { header: 'Ngày tạo', key: 'created_at', width: 14, style: { numFmt: 'dd/mm/yyyy' } },
+        { header: 'Cập nhật cuối', key: 'updated_at', width: 14, style: { numFmt: 'dd/mm/yyyy' } }
+      ]
+
+      sheet.getRow(1).font = { bold: true }
+
+      registrations.forEach((item) => {
+        // amount_paid / amount_due là cột decimal -> TypeORM trả về string, phải ép Number
+        const amountDue = Number(item.amount_due) || 0
+        const amountPaid = Number(item.amount_paid) || 0
+
+        sheet.addRow({
+          customer_name: item.customer_name,
+          parent_name: parentLabel(item.parent_id),
+          phone: item.phone,
+          address: item.address,
+          notes: item.notes,
+          registration_date: item.registrationDate,
+          duration_months: item.duration_months,
+          end_date: item.end_date,
+          days_left: daysLeft(item.end_date),
+          status: statusLabel(item.status),
+          amount_due: amountDue,
+          amount_paid: amountPaid,
+          amount_remaining: amountDue - amountPaid,
+          created_at: item.createdAt,
+          updated_at: item.updatedAt
+        })
+      })
+
+      const buffer = await workbook.xlsx.writeBuffer()
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+      res.setHeader('Content-Disposition', 'attachment; filename="dang-ky-dich-vu.xlsx"')
+      return res.status(200).send(Buffer.from(buffer))
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: 'Lỗi khi xuất dữ liệu đăng ký dịch vụ',
         error: error.message
       })
     }

@@ -126,6 +126,13 @@ export class ServiceRegistrationServiceTypeORM {
     return registration
   }
 
+  // Get all service registrations for export (no pagination, no filters)
+  static async getAllForExport() {
+    return typeormService.serviceRegistrationRepository.find({
+      order: { registrationDate: 'DESC' }
+    })
+  }
+
   // Create new service registration
   static async createServiceRegistration(data: CreateServiceRegistrationBody) {
     const registration = new ServiceRegistration()
