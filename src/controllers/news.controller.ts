@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { NewsServiceTypeORM } from '~/services/news-typeorm.service'
 import type { NewsStatus } from '~/entities/News.entity'
 import HTTP_STATUS from '~/constants/httpStatus'
+import { ErrorWithStatus } from '~/models/Errors'
 
 const DEFAULT_LIMIT = 9
 const MAX_LIMIT = 100
@@ -157,6 +158,12 @@ export class NewsController {
         data: news
       })
     } catch (error) {
+      if (error instanceof ErrorWithStatus) {
+        return res.status(error.status).json({
+          isSuccess: false,
+          message: error.message
+        })
+      }
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         isSuccess: false,
         message: 'Internal server error',

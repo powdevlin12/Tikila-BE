@@ -3,6 +3,8 @@ import typeormService from './typeorm.service'
 import { News } from '~/entities'
 import type { NewsStatus } from '~/entities/News.entity'
 import { buildUniqueSlug, slugify } from '~/utils/slug'
+import { ErrorWithStatus } from '~/models/Errors'
+import HTTP_STATUS from '~/constants/httpStatus'
 
 export interface CreateNewsBody {
   title: string
@@ -75,6 +77,22 @@ export class NewsServiceTypeORM {
         news.publishedAt = new Date()
       }
       news.status = data.status
+    }
+
+    // Ràng buộc "đăng bài phải có mô tả + nội dung" phải xét trên bản ghi sau
+    // khi merge, không phải trên body request: body có thể chỉ gửi
+    // {"status":"published"} vì description/content đã có sẵn từ trước.
+    // Middleware không nhìn thấy bản ghi đã lưu nên không thể tự kiểm tra
+    // được điều này.
+    if (news.status === 'published') {
+      const hasDescription = typeof news.description === 'string' && news.description.trim().length > 0
+      const hasContent = typeof news.content === 'string' && news.content.trim().length > 0
+      if (!hasDescription || !hasContent) {
+        throw new ErrorWithStatus({
+          message: 'Bài viết phải có mô tả ngắn và nội dung mới đăng được',
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
     }
 
     return await typeormService.newsRepository.save(news)

@@ -51,6 +51,10 @@ export const validateCreateNews = [
   handleValidationErrors
 ]
 
+// Update chỉ kiểm tra field nào được gửi lên — description/content không gửi
+// tức là giữ nguyên giá trị đã lưu, việc đó đủ hay không (khi publish) chỉ
+// service mới biết vì phải nhìn vào bản ghi sau khi merge. Do đó update giữ
+// optional: true, còn ràng buộc thật sự nằm ở NewsServiceTypeORM.updateNews.
 export const validateUpdateNews = [
   checkSchema({
     title: {
@@ -69,8 +73,8 @@ export const validateUpdateNews = [
       optional: true,
       isIn: { options: [['draft', 'published']], errorMessage: 'Trạng thái phải là draft hoặc published' }
     },
-    description: requiredWhenPublished('description', 'Mô tả ngắn'),
-    content: requiredWhenPublished('content', 'Nội dung'),
+    description: { optional: true, ...requiredWhenPublished('description', 'Mô tả ngắn') },
+    content: { optional: true, ...requiredWhenPublished('content', 'Nội dung') },
     image_url: {
       optional: true,
       isLength: { options: { max: 500 }, errorMessage: 'Đường dẫn ảnh không quá 500 ký tự' }
