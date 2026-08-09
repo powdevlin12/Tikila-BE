@@ -28,14 +28,17 @@ FROM node:22-alpine AS runner
 WORKDIR /app/tikila-BE
 ENV NODE_ENV=production
 
+# su-exec để entrypoint hạ quyền từ root xuống node sau khi sửa quyền uploads
+RUN apk add --no-cache su-exec
+
 COPY --from=prod-deps --chown=node:node /app/tikila-BE/node_modules ./node_modules
 COPY --from=builder  --chown=node:node /app/tikila-BE/dist ./dist
 # doc-api.yaml được đọc bằng path.resolve('doc-api.yaml') lúc khởi động
 COPY --chown=node:node package.json doc-api.yaml ./
 
-RUN mkdir -p /app/uploads/images/temp /app/uploads/videos/temp \
-    && chown -R node:node /app/uploads
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-USER node
 EXPOSE 1236
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "dist/index.js", "--env=production"]
