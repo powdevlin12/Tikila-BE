@@ -32,11 +32,16 @@ const requiredWhenPublished = (field: string, label: string) => ({
 export const validateCreateNews = [
   checkSchema({
     title: {
-      // trim phải đứng trước notEmpty: checkSchema chạy đúng thứ tự khai báo,
-      // để sau thì tiêu đề toàn khoảng trắng lọt qua rồi bị trim thành rỗng.
+      // Thứ tự isString -> trim -> notEmpty là bắt buộc, checkSchema chạy đúng
+      // thứ tự khai báo:
+      // - isString phải đứng trước trim, vì isString kiểm tra giá trị SAU khi
+      //   sanitize, còn trim thì ép kiểu về chuỗi trước. Để sau thì 123 biến
+      //   thành "123" và lọt qua.
+      // - trim phải đứng trước notEmpty, để sau thì tiêu đề toàn khoảng trắng
+      //   lọt qua rồi mới bị trim thành rỗng.
+      isString: { errorMessage: 'Tiêu đề phải là chuỗi' },
       trim: true,
       notEmpty: { errorMessage: 'Tiêu đề là bắt buộc' },
-      isString: { errorMessage: 'Tiêu đề phải là chuỗi' },
       isLength: { options: { max: 255 }, errorMessage: 'Tiêu đề không quá 255 ký tự' }
     },
     status: {
@@ -61,13 +66,15 @@ export const validateUpdateNews = [
   checkSchema({
     title: {
       optional: true,
-      // trim phải đứng trước notEmpty — xem giải thích ở validateCreateNews.
+      // Thứ tự isString -> trim -> notEmpty — xem giải thích ở validateCreateNews.
+      isString: { errorMessage: 'Tiêu đề phải là chuỗi' },
       trim: true,
       notEmpty: { errorMessage: 'Tiêu đề không được rỗng' },
       isLength: { options: { max: 255 }, errorMessage: 'Tiêu đề không quá 255 ký tự' }
     },
     slug: {
       optional: true,
+      isString: { errorMessage: 'Slug phải là chuỗi' },
       trim: true,
       notEmpty: { errorMessage: 'Slug không được rỗng' },
       isLength: { options: { max: 280 }, errorMessage: 'Slug không quá 280 ký tự' }
