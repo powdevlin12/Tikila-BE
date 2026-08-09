@@ -105,6 +105,17 @@ export class NewsServiceTypeORM {
 
   static async getPublishedList(page: number, limit: number): Promise<PaginatedNews> {
     const [items, total] = await typeormService.newsRepository.findAndCount({
+      // Danh sách công khai chỉ render thẻ bài viết, không cần `content`
+      // (kiểu longtext) lẫn các cột nội bộ `status`/`isDelete`. Không giới hạn
+      // cột thì mỗi trang danh sách kéo theo toàn bộ nội dung từng bài.
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        imageUrl: true,
+        publishedAt: true
+      },
       where: { status: 'published', isDelete: false },
       order: { publishedAt: 'DESC', id: 'DESC' },
       skip: (page - 1) * limit,
