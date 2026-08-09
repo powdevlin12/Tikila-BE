@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.gitignore
+.vscode
+.superpowers
+.DS_Store
+npm-debug.log*
+Dockerfile*
+.dockerignore
+README.md
+dev.env.txt
+# env được truyền qua docker compose, không bake vào image
+.env.development
+.env.production
+.env.staging
