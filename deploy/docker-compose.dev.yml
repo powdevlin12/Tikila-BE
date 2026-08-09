@@ -1,0 +1,81 @@
+name: jetwash-dev
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    restart: unless-stopped
+    command: --skip-log-bin
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MYSQL_DATABASE}
+      MARIADB_USER: ${MYSQL_USERNAME}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mariadb_dev_data:/var/lib/mysql
+    ports:
+      # 3307 để không đụng MySQL/MariaDB cài sẵn trên máy
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  tikila-be:
+    build:
+      context: ./tikila-BE
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    init: true
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    env_file:
+      - .env.dev
+    environment:
+      NODE_ENV: development
+      PORT_SERVER: 1236
+      MYSQL_HOST: mariadb
+      MYSQL_PORT: 3306
+    ports:
+      - "1236:1236"
+    volumes:
+      - ./tikila-BE:/app/tikila-BE
+      # anonymous volume: giữ node_modules cài trong image, không bị bind mount đè
+      - /app/tikila-BE/node_modules
+      - ./uploads:/app/uploads
+
+  fe-nextjs:
+    build:
+      context: ./fe-nextjs
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_BASE_URL: ${DEV_NEXT_PUBLIC_API_BASE_URL}
+      API_BASE_URL: ${DEV_FE_SERVER_API_BASE_URL}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./fe-nextjs:/app
+      - /app/node_modules
+      - /app/.next
+
+  tikila-admin:
+    build:
+      context: ./tikila-admin
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    init: true
+    environment:
+      VITE_API_BASE_URL: ${DEV_VITE_API_BASE_URL}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./tikila-admin:/app
+      - /app/node_modules
+
+volumes:
+  mariadb_dev_data:

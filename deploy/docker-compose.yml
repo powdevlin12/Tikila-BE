@@ -1,0 +1,112 @@
+name: jetwash-prod
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    restart: unless-stopped
+    # Tắt binlog: không dùng replication, tiết kiệm RAM + disk I/O
+    command: --skip-log-bin
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?can thiet lap trong .env}
+      MARIADB_DATABASE: ${MYSQL_DATABASE}
+      MARIADB_USER: ${MYSQL_USERNAME}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD}
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/low-memory.cnf:/etc/mysql/conf.d/low-memory.cnf:ro
+    # Không publish port ra ngoài: chỉ tikila-be trong mạng nội bộ truy cập được
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  tikila-be:
+    build:
+      context: ./Tikila-BE
+      dockerfile: Dockerfile
+    image: jetwash/tikila-be:prod
+    restart: unless-stopped
+    init: true
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Ghi đè các giá trị phải khác khi chạy trong docker.
+      # dotenv trong src/constants/config.ts không override process.env
+      # nên những biến này luôn thắng .env.production trong repo.
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=320
+      PORT_SERVER: 1236
+      MYSQL_HOST: mariadb
+      MYSQL_PORT: 3306
+    ports:
+      - "${BE_PORT:-1236}:1236"
+    volumes:
+      # constants/dir.ts dùng path.resolve('../uploads') -> /app/uploads
+      - ./uploads:/app/uploads
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('net').connect(1236,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  fe-nextjs:
+    build:
+      context: ./tikila-fe-nextjs
+      dockerfile: Dockerfile
+      # app/page.tsx prerender lúc build và gọi backend. Dùng network host để
+      # với tới cổng 1236 mà tikila-be đã publish (xem target `deploy` trong
+      # Makefile: backend được khởi động trước khi build frontend).
+      network: host
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        API_BASE_URL: ${BUILD_API_BASE_URL:-http://127.0.0.1:1236}
+    image: jetwash/fe-nextjs:prod
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_OPTIONS: --max-old-space-size=256
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+      API_BASE_URL: ${API_BASE_URL}
+    ports:
+      - "${FE_PORT:-5004}:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  tikila-admin:
+    build:
+      context: ./tikila-admin
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    image: jetwash/tikila-admin:prod
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_PORT:-4005}:80"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+volumes:
+  mariadb_data:
