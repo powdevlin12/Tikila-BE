@@ -52,7 +52,7 @@ services:
       - "${BE_PORT:-1236}:1236"
     volumes:
       # constants/dir.ts dùng path.resolve('../uploads') -> /app/uploads
-      - ./uploads:/app/uploads
+      - uploads:/app/uploads
     healthcheck:
       test:
         - CMD
