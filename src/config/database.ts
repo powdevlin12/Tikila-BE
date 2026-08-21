@@ -12,7 +12,8 @@ import {
   StarCustomer,
   ServiceRegistration,
   DashboardStatistics,
-  FooterColumn
+  FooterColumn,
+  News
 } from '~/entities'
 import { generateId } from '~/utils/gererator'
 import { hashPassword } from '~/utils/cryto'
@@ -38,7 +39,8 @@ export const AppDataSource = new DataSource({
     StarCustomer,
     ServiceRegistration,
     DashboardStatistics,
-    FooterColumn
+    FooterColumn,
+    News
   ],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts']
