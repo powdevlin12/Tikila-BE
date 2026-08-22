@@ -14,7 +14,8 @@
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "migrate:devices": "npx ts-node src/scripts/migrate-service-registrations-to-devices.ts"
   },
   "keywords": [],
   "author": "",

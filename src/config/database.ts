@@ -11,6 +11,7 @@ import {
   ContactCustomer,
   StarCustomer,
   ServiceRegistration,
+  ServiceRegistrationDevice,
   DashboardStatistics,
   FooterColumn,
   News
@@ -38,6 +39,7 @@ export const AppDataSource = new DataSource({
     ContactCustomer,
     StarCustomer,
     ServiceRegistration,
+    ServiceRegistrationDevice,
     DashboardStatistics,
     FooterColumn,
     News

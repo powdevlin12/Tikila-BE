@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: tikila-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jetwash
+    ports:
+      - "3306:3306"
+    volumes:
+      - tikila-db_data:/var/lib/mysql
+    command:
+      # giới hạn RAM để chạy nhẹ, phù hợp máy dev/VPS nhỏ
+      - --innodb-buffer-pool-size=256M
+      - --max-connections=50
+      - --performance-schema=OFF
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: tikila-api
+    ports:
+      - "1236:1236"
+    volumes:
+      - ./src:/app/src
+      - ./.env.development:/app/.env.development
+      - ./doc-api.yaml:/app/doc-api.yaml
+      - ./nodemon.json:/app/nodemon.json
+      - ./tsconfig.json:/app/tsconfig.json
+    environment:
+      # App tự đọc .env.development qua dotenv (không ghi đè biến đã set),
+      # nên chỉ cần override phần kết nối DB để trỏ vào service "db".
+      - NODE_ENV=development
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=jetwash
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  tikila-db_data:
